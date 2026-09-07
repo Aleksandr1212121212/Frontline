@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Front line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*__LEAFLET_CSS__*/
+</style>
+<style>
+:root{
+  --paper:#F8F7F3; --water:#D2DDE3; --land:#ECE9E0; --land-ua:#F2F0E9;
+  --ink:#1E2327; --ink-2:#58626E; --ink-3:#98A1AA; --rule:#DBD8D0;
+  --accent:#2B4A66;
+  --ru:#9E2A2B; --ru-soft:rgba(158,42,43,.24);
+  --ua:#2F6FB0; --ua-soft:rgba(47,111,176,.22);
+  --claim:#B4574E; --unsure:#8A7F72;
+  --gain:#E4572E; --loss:#3A6EA5;
+  --shadow:0 2px 14px rgba(30,35,39,.10), 0 0 0 1px rgba(30,35,39,.06);
+  --radius:10px;
+  --font:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--water);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.35;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+#map{position:fixed;inset:0;background:var(--water)}
+.leaflet-container{font-family:var(--font);background:var(--water)}
+.leaflet-control-attribution{background:rgba(248,247,243,.82);color:var(--ink-2);font-size:10px}
+.leaflet-popup-content-wrapper{border-radius:8px;box-shadow:var(--shadow);background:var(--paper);color:var(--ink)}
+.leaflet-popup-content{margin:10px 12px;font-size:13px;line-height:1.42}
+.leaflet-popup-content a{color:var(--accent)}
+.leaflet-popup-tip{background:var(--paper)}
+.leaflet-container a.leaflet-popup-close-button{color:var(--ink-3)}
+
+.lbl{white-space:nowrap;color:#3B434A;text-shadow:0 0 3px var(--land-ua),0 0 3px var(--land-ua),0 0 3px var(--land-ua);pointer-events:none;transform:translate(6px,-9px)}
+.lbl.big{font-weight:600;font-size:13px}.lbl.mid{font-weight:500;font-size:12px}.lbl.small{font-size:11px;color:#59626A}
+.lbl::before{content:"";position:absolute;left:-7px;top:6px;width:4px;height:4px;border-radius:50%;background:#3B434A}
+.lbl.big::before{width:6px;height:6px;left:-9px;border:1.5px solid var(--land-ua)}
+.hot-lbl{font-size:11px;font-weight:600;color:var(--unsure);white-space:nowrap;transform:translate(-50%,12px);text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff}
+.searchpin{width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.35)}
+
+.hdr{position:fixed;left:14px;top:14px;z-index:1000;width:min(370px,calc(100vw - 28px));background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px 10px}
+.hdr h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px}
+.hdr h1 span{font-weight:400;color:var(--ink-2);font-size:13px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin:10px 0}
+.stat b{display:block;font-size:20px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat i{font-style:normal;color:var(--ink-2);font-size:12px}
+.pos{color:var(--gain)}.neg{color:var(--loss)}
+.seg{display:flex;background:#E8E6DF;border-radius:8px;padding:3px;gap:2px}
+.seg button{flex:1;padding:7px 4px;border-radius:6px;font-size:12.5px;font-weight:500;color:var(--ink-2);line-height:1.15}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg button:disabled{color:var(--ink-3);cursor:not-allowed}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.modenote{margin:8px 0 0;font-size:12px;color:var(--ink-2)}
+.modenote.hide{display:none}
+.hdr .fold{display:none}
+.warn{margin:8px 0 0;padding:8px 10px;border-radius:8px;background:#F6EFE2;color:#6B5836;font-size:12px}
+.warn b{font-weight:600}
+
+.legend{position:fixed;left:14px;bottom:14px;z-index:1000;background:rgba(248,247,243,.94);border-radius:8px;box-shadow:var(--shadow);padding:8px 10px;font-size:11.5px;color:var(--ink-2);display:grid;gap:4px}
+.legend div{display:flex;align-items:center;gap:7px}
+.legend .sw{width:16px;height:10px;border-radius:2px;flex:none}
+.legend .ln{width:16px;height:0;border-top:2px solid;flex:none}
+.legend .ln.dash{border-top-style:dashed}
+
+.ribbon{position:fixed;left:14px;right:14px;bottom:14px;z-index:1000;max-width:700px;margin:0 auto;background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 14px 8px;user-select:none;-webkit-user-select:none}
+.rb-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;flex-wrap:wrap}
+.rb-title{font-size:13px;color:var(--ink-2)}.rb-title b{color:var(--ink);font-weight:600}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chips button{padding:4px 9px;border-radius:14px;font-size:12px;font-weight:500;color:var(--ink-2);background:#E8E6DF}
+.chips button.on{background:var(--accent);color:#fff}
+.spark{position:relative;height:60px;touch-action:none;cursor:ew-resize}
+.spark svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.rb-axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);margin-top:2px;font-variant-numeric:tabular-nums}
+.rb-empty{padding:6px 0 4px;font-size:12.5px;color:var(--ink-2)}
+
+.panel{position:fixed;right:14px;top:14px;bottom:14px;z-index:1000;width:min(370px,calc(100vw - 28px));background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;transition:transform .28s cubic-bezier(.2,.7,.2,1)}
+.panel.closed{transform:translateX(calc(100% + 14px))}
+.ptabs{display:flex;gap:2px;padding:8px 8px 0;border-bottom:1px solid var(--rule)}
+.ptabs button{padding:8px 7px;font-size:12.5px;font-weight:500;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.ptabs button.on{color:var(--ink);border-color:var(--ink)}
+.ptabs .close{margin-left:auto;color:var(--ink-3);font-size:18px;padding:4px 6px}
+.pbody{overflow:auto;padding:12px 14px 18px;flex:1;-webkit-overflow-scrolling:touch}
+.pbody h3{margin:14px 0 6px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.pbody h3:first-child{margin-top:0}
+.pbody p{margin:6px 0;color:var(--ink-2);font-size:13px}
+.pbody p.lead{color:var(--ink)}
+.row{display:flex;align-items:flex-start;gap:8px;padding:6px;margin:0 -6px;border-radius:6px;font-size:13px;width:calc(100% + 12px);text-align:left}
+.row:hover{background:#EEECE4}
+.row .dot{width:9px;height:9px;border-radius:50%;flex:none;margin-top:4px}
+.row .meta{margin-left:auto;color:var(--ink-3);font-size:11.5px;flex:none;padding-left:8px}
+.row .body{min-width:0}
+.row .body small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:1px;overflow:hidden;text-overflow:ellipsis}
+.quiet{color:var(--ink-3);font-size:12.5px}
+.tog{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13.5px;gap:10px}
+.tog:last-child{border-bottom:0}
+.tog small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:1px}
+.sw2{width:36px;height:22px;border-radius:11px;background:#D5D2C9;position:relative;flex:none;transition:background .15s}
+.sw2::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:left .15s}
+.sw2.on{background:var(--accent)}.sw2.on::after{left:16px}
+.sw2:disabled{opacity:.45;cursor:not-allowed}
+.search{width:100%;padding:9px 11px;border:1px solid var(--rule);border-radius:8px;background:#fff;outline:0}
+.search:focus{border-color:var(--accent)}
+.chart{width:100%;height:150px;display:block}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
+.kv b{font-weight:500;color:var(--ink-2)}
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}
+.tags button{padding:3px 8px;border-radius:12px;font-size:11.5px;background:#E8E6DF;color:var(--ink-2)}
+.tags button.on{background:var(--accent);color:#fff}
+.src{font-size:12px;color:var(--ink-2);border-bottom:1px solid var(--rule);padding:6px 0;display:flex;justify-content:space-between;gap:10px}
+.src b{font-weight:500}
+.src .ok{color:#2E7D4F}.src .bad{color:#A6412F}
+
+.opener{position:fixed;right:14px;top:14px;z-index:999;background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 12px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px}
+.zoomctl{position:fixed;right:14px;bottom:14px;z-index:999;display:flex;flex-direction:column;background:var(--paper);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
+.zoomctl button{width:36px;height:34px;font-size:18px;color:var(--ink-2)}
+.zoomctl button+button{border-top:1px solid var(--rule)}
+.panel:not(.closed)~.zoomctl{right:calc(14px + min(370px,calc(100vw - 28px)) + 10px)}
+body.panel-open .ribbon{right:calc(14px + min(370px,calc(100vw - 28px)) + 10px)}
+.ribbon{left:calc(14px + min(370px,calc(100vw - 28px)) + 10px)}
+
+@media (max-width:820px){
+  .hdr{left:10px;top:10px;width:calc(100vw - 20px);padding:10px 12px 8px}
+  .hdr h1{font-size:15px}
+  .hdr .fold{display:block;position:absolute;right:8px;top:8px;color:var(--ink-3);padding:4px 8px;font-size:12px}
+  .hdr.folded .stats,.hdr.folded .modenote,.hdr.folded .warn{display:none}
+  .stat b{font-size:17px}
+  .legend{display:none}
+  .ribbon,body.panel-open .ribbon{left:10px;right:10px;max-width:none;bottom:calc(var(--peek,84px) + 10px);padding:8px 12px 6px}
+  .spark{height:46px}.rb-title{display:none}
+  .panel{left:0;right:0;top:auto;bottom:0;width:100%;border-radius:14px 14px 0 0;height:var(--sheet,84px);transition:height .25s cubic-bezier(.2,.7,.2,1);padding-bottom:env(safe-area-inset-bottom)}
+  .panel.closed{transform:none}
+  .grab{height:20px;display:flex;align-items:center;justify-content:center;touch-action:none}
+  .grab::before{content:"";width:40px;height:4px;border-radius:2px;background:#CFCBC1}
+  .ptabs{padding-top:0;overflow-x:auto}.ptabs button{flex:none}.ptabs .close{display:none}
+  .opener,.zoomctl{display:none}
+}
+@media (min-width:821px){.grab{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="map" role="application" aria-label="Map"></div>
+
+<section class="hdr" id="hdr">
+  <button class="fold" id="fold">Less</button>
+  <h1>Front line <span id="asof"></span></h1>
+  <div class="stats" id="stats"></div>
+  <div class="seg" role="tablist" aria-label="Reading">
+    <button class="on" data-mode="base" role="tab">Map</button>
+    <button data-mode="claimed" role="tab">Claimed</button>
+    <button data-mode="ru" role="tab">Russian reporting</button>
+  </div>
+  <p class="modenote hide" id="modenote"></p>
+  <div id="warnbox"></div>
+</section>
+
+<div class="legend" id="legend"></div>
+
+<section class="ribbon" id="ribbon">
+  <div class="rb-top">
+    <div class="rb-title">Compared with <b id="rb-date">—</b></div>
+    <div class="chips" id="chips"></div>
+    <div class="rb-delta" id="rb-delta"></div>
+  </div>
+  <div id="rb-body"></div>
+</section>
+
+<button class="opener" id="opener" style="display:none">Details</button>
+
+<aside class="panel" id="panel">
+  <div class="grab" id="grab"></div>
+  <div class="ptabs" id="ptabs">
+    <button class="on" data-tab="reports">Reports</button>
+    <button data-tab="changes">Changes</button>
+    <button data-tab="layers">Layers</button>
+    <button data-tab="search">Search</button>
+    <button data-tab="sources">Sources</button>
+    <button class="close" id="pclose">×</button>
+  </div>
+  <div class="pbody" id="pbody"></div>
+</aside>
+
+<div class="zoomctl"><button id="zin">+</button><button id="zout">−</button></div>
+
+<script>
+/*__LEAFLET_JS__*/
+</script>
+<script id="data" type="application/json">/*__DATA__*/</script>
+<script>
+(function(){
+'use strict';
+const D = JSON.parse(document.getElementById('data').textContent);
+const S = D.stats;
+const $ = s => document.querySelector(s);
+const fmt = n => n==null ? '–' : Math.round(n).toLocaleString('en-US');
+const fmtS = n => n==null ? '–' : (n>0?'+':n<0?'−':'') + Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:Math.abs(n)<10?1:0});
+const dfmt = (iso,long) => { if(!iso) return '—'; const [y,m,d]=iso.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('en-GB', long?{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}:{day:'numeric',month:'short',timeZone:'UTC'}); };
+const isPhone = () => window.matchMedia('(max-width:820px)').matches;
+let mode='base', tab='reports', nameLang='latin';
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const UKRAINE_KM2 = 603628;
+
+const ring2ll = r => r.map(p=>[p[1],p[0]]);
+const polys2ll = ps => ps.map(rings => rings.map(ring2ll));
+const lines2ll = ls => ls.map(ring2ll);
+
+// ---------- map
+const map = L.map('map',{zoomControl:false,minZoom:5,maxZoom:14,zoomSnap:.5,preferCanvas:true});
+map.attributionControl.setPrefix('');
+const canvas = L.canvas({padding:.5});
+const attrib = ['Base: Natural Earth, GeoNames'];
+if (D.control.ru.length) attrib.unshift('Control: ' + (S.base_source==='kalibrated' ? 'Kalibrated' : 'ISW'));
+map.attributionControl.addAttribution(attrib.join(' · '));
+
+// basemap
+const baseGroup = L.layerGroup().addTo(map);
+const lakes=L.layerGroup(), rivers=L.layerGroup(), roads=L.layerGroup(), oblasts=L.layerGroup(), urban=L.layerGroup();
+D.basemap.land.forEach(c=>L.polygon(polys2ll(c.c),{renderer:canvas,fillColor:c.a3==='UKR'?css('--land-ua'):css('--land'),fillOpacity:1,color:'#B8B3A7',weight:c.a3==='UKR'?1.6:.9,interactive:false}).addTo(baseGroup));
+D.basemap.lakes.forEach(l=>L.polygon(polys2ll(l.c),{renderer:canvas,fillColor:css('--water'),fillOpacity:1,color:'#B6C5CE',weight:.6,interactive:false}).addTo(lakes));
+D.basemap.rivers.forEach(r=>L.polyline(lines2ll(r.c),{renderer:canvas,color:'#AEC0CA',weight:r.r<=4?1.6:r.r<=6?1.1:.7,interactive:false}).addTo(rivers));
+D.basemap.roads.forEach(r=>L.polyline(lines2ll(r.c),{renderer:canvas,color:'#CEC8BB',weight:r.r<=5?1.1:.7,interactive:false}).addTo(roads));
+D.basemap.oblasts.forEach(o=>L.polygon(polys2ll(o.c),{renderer:canvas,fill:false,color:o.a3==='UKR'?'#9B9486':'#C3BDAF',weight:.8,dashArray:'3 4',interactive:false}).addTo(oblasts));
+D.basemap.urban.forEach(u=>L.polygon(polys2ll(u),{renderer:canvas,fillColor:'#D8D3C7',fillOpacity:1,stroke:false,interactive:false}).addTo(urban));
+lakes.addTo(map); rivers.addTo(map); oblasts.addTo(map);
+const tiles = {
+  osm:L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}),
+  sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri, Maxar'})
+};
+let tileMode='none';
+
+// ---------- war layers
+const ruControl = L.polygon(polys2ll(D.control.ru),{renderer:canvas,fillColor:css('--ru'),fillOpacity:.24,color:css('--ru'),weight:.7,opacity:.5,interactive:false});
+const uaHeld = L.polygon(polys2ll(D.control.ua_held),{renderer:canvas,fillColor:css('--ua'),fillOpacity:.22,color:css('--ua'),weight:1,opacity:.65,interactive:false});
+const frontLine = L.polyline(lines2ll(D.control.front),{renderer:canvas,color:css('--ru'),weight:2.2,interactive:false});
+const claimedLayer = L.polygon(polys2ll(D.control.claimed),{renderer:canvas,fillColor:css('--claim'),fillOpacity:.2,color:css('--claim'),weight:1.1,dashArray:'5 4',interactive:false});
+const claimGap = L.polygon(polys2ll(D.uncertainty.claim_gap),{renderer:canvas,fillColor:css('--claim'),fillOpacity:.28,color:css('--claim'),weight:1,dashArray:'3 3',interactive:false});
+const disagree = L.polygon(polys2ll(D.uncertainty.disagreement),{renderer:canvas,fillColor:css('--unsure'),fillOpacity:.22,color:css('--unsure'),weight:.9,dashArray:'2 4',interactive:false});
+const greyZone = L.layerGroup();
+if (D.uncertainty.zone.length) L.polygon(polys2ll(D.uncertainty.zone),{renderer:canvas,fillColor:css('--unsure'),fillOpacity:.3,color:css('--unsure'),weight:1,dashArray:'2 3',interactive:false}).addTo(greyZone);
+const featherGroup = L.layerGroup();
+D.uncertainty.feather.forEach(f=>L.polygon(polys2ll(f.c),{renderer:canvas,fillColor:css('--ru'),fillOpacity:.05+.13*f.w,stroke:false,interactive:false}).addTo(featherGroup));
+const hotGroup = L.layerGroup();
+D.uncertainty.hotspots.forEach(h=>{
+  L.circle([h.lat,h.lon],{renderer:canvas,radius:h.km*1000,color:css('--unsure'),weight:1,dashArray:'3 4',fillColor:css('--unsure'),fillOpacity:.12})
+   .bindPopup(`<b>${h.place}</b><br>${h.n} report${h.n>1?'s':''} in the last 10 days${h.sides.length>1?', both sides':''}<br><span style="color:var(--ink-2)">${h.kinds.join(', ').replace(/_/g,' ')}</span>`).addTo(hotGroup);
+});
+const advGroup = L.layerGroup();
+D.advances.forEach(a=>L.polyline(lines2ll([a.c]),{renderer:canvas,color:css('--ru'),weight:2,dashArray:'6 4',opacity:.8}).bindPopup(`<b>${a.n||'Axis'}</b><br>${a.src}`).addTo(advGroup));
+const markerGroup = L.layerGroup();
+D.markers.forEach(m=>L.circleMarker([m.lat,m.lon],{renderer:canvas,radius:4,color:css('--ru'),fillColor:'#fff',fillOpacity:1,weight:1.6}).bindPopup(`<b>${m.n||'Marker'}</b>${m.d?'<br>'+m.d:''}<br><span class="quiet">${m.src}</span>`).addTo(markerGroup));
+const RR = D.russian_read || {control:[],ahead:[],advances:[],markers:[]};
+const ruRead = RR.control.length ? L.polygon(polys2ll(RR.control),{renderer:canvas,fillColor:css('--ru'),fillOpacity:.2,color:css('--ru'),weight:1.2,opacity:.6,interactive:false}) : null;
+const ruAhead = RR.ahead.length ? L.polygon(polys2ll(RR.ahead),{renderer:canvas,fillColor:css('--claim'),fillOpacity:.3,color:css('--claim'),weight:1,dashArray:'4 3',interactive:false}).bindPopup('Russian-side reading, ahead of the base map') : null;
+const ruAheadFeather = L.layerGroup();
+if (RR.ahead.length) [[.16,'8 6'],[.09,'4 8']].forEach(([o,dash],i)=>L.polygon(polys2ll(RR.ahead),{renderer:canvas,fill:false,color:css('--claim'),weight:6+i*8,opacity:o,dashArray:dash,interactive:false}).addTo(ruAheadFeather));
+const ruAdv = L.layerGroup();
+RR.advances.forEach(a=>L.polyline(lines2ll([a.c]),{renderer:canvas,color:css('--claim'),weight:2,dashArray:'6 4',opacity:.85}).bindPopup(`<b>${a.n||'Axis'}</b><br>${a.src}`).addTo(ruAdv));
+RR.markers.forEach(m=>L.circleMarker([m.lat,m.lon],{renderer:canvas,radius:4,color:css('--claim'),fillColor:'#fff',fillOpacity:1,weight:1.6}).bindPopup(`<b>${m.n||'Marker'}</b>${m.d?'<br>'+m.d:''}<br><span class="quiet">${m.src}</span>`).addTo(ruAdv));
+const iswClaimed = D.isw.claimed ? L.polygon(polys2ll(D.isw.claimed),{renderer:canvas,fillColor:css('--claim'),fillOpacity:.18,color:css('--claim'),weight:1,interactive:false}) : null;
+const fortLayer = D.isw.fortifications ? L.polyline(lines2ll(D.isw.fortifications),{renderer:canvas,color:'#4B4F55',weight:1.2,interactive:false}) : null;
+
+// events
+const EV = {ru_taken:{c:'#9E2A2B',t:'claimed taken'}, ru_advance:{c:'#E4572E',t:'advance reported'},
+            contested:{c:'#8A7F72',t:'fighting reported'}, infiltration:{c:'#7B5EA7',t:'infiltration / DRG'},
+            ua_retaken:{c:'#2F6FB0',t:'retaken, reported'}};
+let evFilter = new Set(Object.keys(EV));
+let sideFilter = new Set(['ru','ua','mapper']);
+const evGroup = L.layerGroup();
+function drawEvents(){
+  evGroup.clearLayers();
+  const cutoff = Date.now() - 14*864e5;
+  D.events.forEach(e=>{
+    if (!evFilter.has(e.k) || !sideFilter.has(e.s)) return;
+    if (Date.parse(e.d) < cutoff) return;
+    const st = EV[e.k] || {c:'#888'};
+    const hollow = e.s==='ru';
+    L.circleMarker([e.lat,e.lon],{renderer:canvas,radius:5,color:st.c,weight:1.8,fillColor:hollow?'#fff':st.c,fillOpacity:hollow?.9:.85})
+     .bindPopup(`<b>${e.n}</b> · ${st.t}<br>${dfmt(e.d,true)} · <a href="${e.u}" target="_blank" rel="noopener">${e.src}</a>${e.m!=='matched'?` <span class="quiet">(${e.m} match)</span>`:''}<br><span style="color:var(--ink-2)">${e.t.replace(/[<>]/g,'')}</span>`)
+     .addTo(evGroup);
+  });
+}
+drawEvents();
+
+// fit
+let fitTarget = null;
+if (D.control.front.length) fitTarget = L.latLngBounds(lines2ll(D.control.front).flat());
+else if (D.events.length) fitTarget = L.latLngBounds(D.events.map(e=>[e.lat,e.lon]));
+else fitTarget = L.latLngBounds([[44.4,22.4],[52.4,40.3]]);
+const hasGeom = D.control.ru.length || D.events.length;
+map.fitBounds(fitTarget, isPhone()?{paddingTopLeft:[10,150],paddingBottomRight:[10,250]}:(hasGeom?{paddingTopLeft:[390,30],paddingBottomRight:[400,140]}:{paddingTopLeft:[390,20],paddingBottomRight:[390,90]}));
+
+// ---------- labels
+const labelGroup = L.layerGroup().addTo(map);
+const layerState = {events:true, hotspots:true, feather:true, grey:true, advances:true, markers:true,
+                    labels:true, oblasts:true, rivers:true, roads:true, urban:true, uaheld:true, forts:true};
+function labelClass(p,z){
+  if(z<=5.5) return p>=700000?'big':null;
+  if(z<=6.5) return p>=300000?'big':p>=90000?'mid':null;
+  if(z<=7.5) return p>=200000?'big':p>=40000?'mid':p>=20000?'small':null;
+  if(z<=8.5) return p>=100000?'big':p>=15000?'mid':p>=4000?'small':null;
+  return p>=100000?'big':p>=8000?'mid':'small';
+}
+function drawLabels(){
+  labelGroup.clearLayers();
+  if(!layerState.labels) return;
+  const z=map.getZoom(), b=map.getBounds().pad(.05), placed=[];
+  for(const p of D.places){
+    const cls=labelClass(p.p,z); if(!cls) continue;
+    const ll=L.latLng(p.lat,p.lon); if(!b.contains(ll)) continue;
+    const txt = (nameLang==='cyr' && p.uk) ? p.uk : p.n;
+    const pt=map.latLngToContainerPoint(ll), w=txt.length*(cls==='big'?7.4:cls==='mid'?6.6:6)+14, h=16;
+    if(pt.x+w>map.getSize().x||pt.x<0) continue;
+    let clash=false;
+    for(const q of placed){ if(Math.abs(q.x-pt.x)<(q.w+w)/2 && Math.abs(q.y-pt.y)<h){clash=true;break;} }
+    if(clash) continue;
+    placed.push({x:pt.x+w/2,y:pt.y,w});
+    L.marker(ll,{icon:L.divIcon({className:'lbl '+cls,html:txt,iconSize:null}),interactive:false,keyboard:false}).addTo(labelGroup);
+    if(placed.length>150) break;
+  }
+}
+map.on('moveend zoomend', drawLabels);
+map.on('zoomend', ()=>{ const z=map.getZoom(); const paper=tileMode==='none';
+  if(z>=7&&paper){ if(layerState.roads) roads.addTo(map); if(layerState.urban) urban.addTo(map); } else { map.removeLayer(roads); map.removeLayer(urban); }
+  frontLine.setStyle({weight:z>=9?3:2.2});
+});
+drawLabels();
+
+// ---------- modes
+const NOTES = {
+  base: D.control.ru.length ? '' : 'No control geometry in this build. Everything below is text reporting until the pipeline fetches the map source.',
+  claimed: (D.control.claimed.length||D.isw.claimed) ? 'Territory claimed as Russian-held. Where the claim runs ahead of the mapped line, the gap is filled in.' : 'No claim layer yet. It arrives with ISW or with a claims layer on the source map.',
+  ru: (D.russian_read && D.russian_read.control.length)
+        ? `Read from the Russian-side control map${D.stats.ru_ahead_km2 ? `, which runs ${fmt(D.stats.ru_ahead_km2)} km² ahead of the base map` : ''}, plus reports from Russian channels. Edges are soft where the two readings disagree.`
+        : 'Russian-side reading: claims plus reports from Russian channels. The Russian control map has not been fetched yet.'
+};
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.seg[role=tablist] button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  const note=$('#modenote'); note.textContent=NOTES[m]||''; note.classList.toggle('hide',!NOTES[m]);
+  [ruControl,uaHeld,frontLine,claimedLayer,claimGap,disagree,greyZone,featherGroup,hotGroup,advGroup,markerGroup,evGroup,iswClaimed,fortLayer,ruRead,ruAhead,ruAheadFeather,ruAdv].forEach(l=>{ if(l&&map.hasLayer(l)) map.removeLayer(l); });
+  if (D.control.ru.length) ruControl.addTo(map);
+  if (layerState.uaheld && D.control.ua_held.length) uaHeld.addTo(map);
+  if (D.control.front.length) frontLine.addTo(map);
+  if (layerState.feather && m!=='claimed') featherGroup.addTo(map);
+  if (layerState.grey) greyZone.addTo(map);
+  if (m==='claimed'){
+    if (D.control.claimed.length) claimedLayer.addTo(map);
+    else if (iswClaimed) iswClaimed.addTo(map);
+    if (D.uncertainty.claim_gap.length) claimGap.addTo(map);
+    if (D.uncertainty.disagreement.length) disagree.addTo(map);
+  }
+  if (m==='ru'){
+    if (ruRead) ruRead.addTo(map);
+    if (ruAhead) { ruAheadFeather.addTo(map); ruAhead.addTo(map); }
+    if (!ruRead && D.control.claimed.length) claimedLayer.addTo(map);
+    if (layerState.hotspots) hotGroup.addTo(map);
+    if (layerState.advances) { advGroup.addTo(map); ruAdv.addTo(map); }
+    sideFilter = new Set(['ru','mapper']);
+  } else {
+    sideFilter = new Set(['ru','ua','mapper']);
+    if (layerState.hotspots) hotGroup.addTo(map);
+    if (layerState.advances) advGroup.addTo(map);
+  }
+  if (layerState.markers) markerGroup.addTo(map);
+  if (layerState.forts && fortLayer) fortLayer.addTo(map);
+  if (layerState.events){ drawEvents(); evGroup.addTo(map); }
+  ruControl.setStyle({fillOpacity: m==='ru' ? .3 : (tileMode==='sat'?.34:.24)});
+  drawLegend(); syncHash();
+  if (tab==='reports' && pbody) renderReports();
+}
+document.querySelectorAll('.seg[role=tablist] button').forEach(b=>{
+  const m=b.dataset.mode;
+  if(m==='claimed' && !(D.control.claimed.length||D.isw.claimed)) b.disabled=true;
+  b.addEventListener('click',()=>setMode(m));
+});
+$('.seg[role=tablist]').addEventListener('pointerdown',e=>{const b=e.target.closest('button'); if(b&&b.disabled){$('#modenote').textContent=NOTES.claimed;$('#modenote').classList.remove('hide');}});
+
+function drawLegend(){
+  const L_=[];
+  if (D.control.ru.length) {
+    L_.push(`<div><span class="sw" style="background:${css('--ru-soft')};outline:1px solid ${css('--ru')}"></span>Russian-held (${S.base_source==='kalibrated'?'Kalibrated':'ISW'})</div>`);
+    L_.push(`<div><span class="ln" style="border-color:${css('--ru')}"></span>Contact line</div>`);
+  }
+  if (D.control.ua_held.length && layerState.uaheld) L_.push(`<div><span class="sw" style="background:${css('--ua-soft')};outline:1px solid ${css('--ua')}"></span>Ukrainian-held inside Russia</div>`);
+  if (layerState.feather && mode!=='claimed' && D.uncertainty.feather.length) L_.push(`<div><span class="sw" style="background:rgba(158,42,43,.10)"></span>Soft edge, control unclear</div>`);
+  if (layerState.grey && D.uncertainty.zone.length) L_.push(`<div><span class="sw" style="background:rgba(138,127,114,.3);outline:1px dashed ${css('--unsure')}"></span>Contested / reported fighting</div>`);
+  if (mode==='claimed') L_.push(`<div><span class="sw" style="background:rgba(180,87,78,.28);outline:1px dashed ${css('--claim')}"></span>Claimed beyond the mapped line</div>`);
+  if (mode==='ru' && RR.control.length){
+    L_.push(`<div><span class="sw" style="background:rgba(158,42,43,.20);outline:1px solid ${css('--ru')}"></span>Russian-side control map</div>`);
+    if (RR.ahead.length) L_.push(`<div><span class="sw" style="background:rgba(180,87,78,.3);outline:1px dashed ${css('--claim')}"></span>Ahead of the base map, soft-edged</div>`);
+  }
+  if (layerState.events) L_.push(`<div><span class="sw" style="border-radius:50%;width:10px;height:10px;background:#fff;outline:2px solid ${css('--ru')}"></span>Report pin, tap for the post</div>`);
+  $('#legend').innerHTML = L_.join('');
+  $('#legend').style.display = L_.length ? '' : 'none';
+}
+
+// ---------- header
+$('#asof').textContent = 'as of ' + dfmt(S.date,true);
+function renderStats(){
+  const rows=[];
+  if (S.ru_km2!=null) rows.push([fmt(S.ru_km2),`km² Russian-held · ${(100*S.ru_km2/UKRAINE_KM2).toFixed(1)}% of Ukraine`]);
+  if (S.front_km!=null) rows.push([fmt(S.front_km),'km of contact line']);
+  if (S.uncertain_km2) rows.push([fmt(S.uncertain_km2),'km² contested or unclear']);
+  if (S.ua_held_ru_km2) rows.push([fmt(S.ua_held_ru_km2),'km² Ukrainian-held in Russia']);
+  if (S.ru_ahead_km2) rows.push([fmt(S.ru_ahead_km2),'km² Russian map runs ahead']);
+  if (S.claim_gap_km2) rows.push([fmt(S.claim_gap_km2),'km² claimed beyond the line']);
+  if (S.d7!=null) rows.push([fmtS(S.d7),'km² in 7 days']);
+  if (!rows.length) rows.push(['—','no control data yet']);
+  $('#stats').innerHTML = rows.slice(0,4).map(([a,b])=>`<div class="stat"><b class="${String(a).startsWith('+')?'pos':String(a).startsWith('−')?'neg':''}">${a}</b><i>${b}</i></div>`).join('');
+}
+renderStats();
+const warns=[];
+if (!D.control.ru.length) warns.push('The map source has not been fetched yet, so there is no control geometry. Run the pipeline once and this fills in.');
+if (!S.n_snapshots) warns.push('History starts the first time the pipeline runs. There is no back catalogue for this source.');
+if (D.unlocated.length) warns.push(`${D.unlocated.length} reported place name${D.unlocated.length>1?'s':''} could not be matched to coordinates; they are listed under Reports.`);
+$('#warnbox').innerHTML = warns.length ? `<div class="warn">${warns.map(w=>`<div>${w}</div>`).join('')}</div>` : '';
+$('#fold').addEventListener('click',()=>{const h=$('#hdr');h.classList.toggle('folded');$('#fold').textContent=h.classList.contains('folded')?'More':'Less';});
+
+// ---------- time ribbon
+const anchors=D.anchors, series=D.series;
+let anchorIdx=anchors.length?anchors.length-1:-1;
+const cur=()=>anchors[anchorIdx];
+const changeGroup=L.layerGroup().addTo(map);
+function renderRibbon(){
+  const body=$('#rb-body'), chips=$('#chips');
+  if(!series.length){
+    chips.innerHTML='';
+    $('#rb-date').textContent='—';
+    body.innerHTML=`<div class="rb-empty">No history yet. Each pipeline run stores one snapshot, and this becomes a slider once there are a few days${S.last_change?` (last change seen ${dfmt(S.last_change,true)})`:''}.</div>`;
+    return;
+  }
+  if(series.length<2){
+    chips.innerHTML=''; $('#rb-date').textContent=dfmt(series[0].d,true);
+    $('#rb-delta').innerHTML='';
+    body.innerHTML=`<div class="rb-empty">First snapshot stored ${dfmt(series[0].d,true)}. Gains and losses appear from the next run, and the slider fills in over the following week.</div>`;
+    return;
+  }
+  chips.innerHTML = ['1','7','30','90','365','all'].map(d=>`<button data-days="${d}">${d==='all'?'All':d==='365'?'1 y':d+' d'}</button>`).join('');
+  chips.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setAnchor(chipAnchor(b.dataset.days))));
+  body.innerHTML=`<div class="spark" id="spark" role="slider" tabindex="0"><svg id="sparksvg" preserveAspectRatio="none"></svg></div>
+    <div class="rb-axis"><span>${dfmt(series[0].d,true)}</span><span>${series.length} snapshot${series.length>1?'s':''}</span><span>${dfmt(series[series.length-1].d,true)}</span></div>`;
+  const spark=$('#spark');
+  let dragging=false;
+  const onDrag=e=>{const r=spark.getBoundingClientRect();const f=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));const i=pickAnchor(f);if(i!==anchorIdx)setAnchor(i);};
+  spark.addEventListener('pointerdown',e=>{dragging=true;spark.setPointerCapture(e.pointerId);onDrag(e);});
+  spark.addEventListener('pointermove',e=>{if(dragging)onDrag(e);});
+  spark.addEventListener('pointerup',()=>dragging=false);
+  spark.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')setAnchor(Math.max(0,anchorIdx-1));if(e.key==='ArrowRight')setAnchor(Math.min(anchors.length-1,anchorIdx+1));});
+  setAnchor(anchorIdx>=0?anchorIdx:0);
+}
+const t0=series.length?Date.parse(series[0].d):0, t1=series.length?Date.parse(series[series.length-1].d):1;
+const xOf=iso=>(Date.parse(iso)-t0)/((t1-t0)||1);
+function pickAnchor(f){let best=0,bd=1e9;anchors.forEach((a,i)=>{const d=Math.abs(xOf(a.d)-f);if(d<bd){bd=d;best=i;}});return best;}
+function chipAnchor(days){ if(days==='all') return 0; const target=Date.parse(series[series.length-1].d)-Number(days)*864e5; let best=0; anchors.forEach((a,i)=>{ if(Date.parse(a.d)<=target) best=i; }); return best; }
+function drawSpark(){
+  const svg=$('#sparksvg'); if(!svg||!series.length) return;
+  const W=1000,H=100, mn=Math.min(...series.map(s=>s.a)), mx=Math.max(...series.map(s=>s.a));
+  const y=a=>8+(1-(a-mn)/((mx-mn)||1))*(H-16);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const pts=series.map(s=>`${(xOf(s.d)*W).toFixed(1)},${y(s.a).toFixed(1)}`);
+  const ax=cur()?xOf(cur().d)*W:0;
+  svg.innerHTML=`<path d="M${pts[0]} L${pts.join(' L')} L${W},${H} L0,${H} Z" fill="${css('--ru')}" fill-opacity=".10"/>
+  <path d="M${pts.join(' L')}" fill="none" stroke="${css('--ru')}" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+  <rect x="${ax.toFixed(1)}" y="0" width="${(W-ax).toFixed(1)}" height="${H}" fill="${css('--gain')}" fill-opacity=".07"/>
+  <line x1="${ax.toFixed(1)}" x2="${ax.toFixed(1)}" y1="0" y2="${H}" stroke="${css('--ink')}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`;
+}
+function setAnchor(i){
+  if(!anchors.length) return;
+  anchorIdx=i; const a=cur();
+  $('#rb-date').textContent=dfmt(a.d,true);
+  const net=a.gained_km2-a.lost_km2;
+  $('#rb-delta').innerHTML = a.d===series[series.length-1].d ? '<b>latest snapshot</b>' :
+    `<span class="pos">+${fmt(a.gained_km2)}</span> / <span class="neg">−${fmt(a.lost_km2)}</span> km² · net <b class="${net>0?'pos':net<0?'neg':''}">${fmtS(net)}</b>`;
+  document.querySelectorAll('#chips button').forEach(b=>b.classList.toggle('on',chipAnchor(b.dataset.days)===i));
+  changeGroup.clearLayers();
+  a.gained.forEach(r=>L.polygon(r.map(ring2ll),{renderer:canvas,fillColor:css('--gain'),fillOpacity:.6,color:css('--gain'),weight:1}).addTo(changeGroup));
+  a.lost.forEach(r=>L.polygon(r.map(ring2ll),{renderer:canvas,fillColor:css('--loss'),fillOpacity:.6,color:css('--loss'),weight:1}).addTo(changeGroup));
+  drawSpark(); drawLegend(); syncHash();
+}
+renderRibbon();
+
+// ---------- panel
+const panel=$('#panel'), pbody=$('#pbody');
+function renderPanel(){
+  document.querySelectorAll('#ptabs button[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  ({reports:renderReports, changes:renderChanges, layers:renderLayers, search:renderSearch, sources:renderSources}[tab])();
+  syncHash();
+}
+document.querySelectorAll('#ptabs button[data-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab;renderPanel();if(isPhone()&&sheet==='peek')setSheet('half');}));
+
+function renderReports(){
+  const shown = D.events.filter(e=>evFilter.has(e.k)&&sideFilter.has(e.s));
+  let h = `<p class="lead">${shown.length} settlement-level report${shown.length===1?'':'s'} from the last two weeks, read straight from the channels.</p>`;
+  h += `<div class="tags" id="evtags">` + Object.entries(EV).map(([k,v])=>`<button data-k="${k}" class="${evFilter.has(k)?'on':''}">${v.t}</button>`).join('') + `</div>`;
+  const byDay = {};
+  shown.forEach(e=>(byDay[e.d]=byDay[e.d]||[]).push(e));
+  const days = Object.keys(byDay).sort().reverse().slice(0,14);
+  if(!days.length) h += `<p class="quiet">Nothing yet. The pipeline reads Russian, Ukrainian and mapper channels on each run.</p>`;
+  for(const d of days){
+    h += `<h3>${dfmt(d,true)}</h3>`;
+    for(const e of byDay[d].slice(0,40)){
+      const st=EV[e.k]||{c:'#888',t:e.k};
+      h += `<button class="row" data-lat="${e.lat}" data-lon="${e.lon}"><span class="dot" style="background:${st.c}"></span><span class="body">${e.n} <span class="quiet">· ${st.t}</span><small>${e.src} · ${e.s==='ru'?'Russian source':e.s==='ua'?'Ukrainian source':'mapper'}${e.m!=='matched'?' · '+e.m+' match':''}</small></span></button>`;
+    }
+  }
+  if (D.unlocated.length){
+    h += `<h3>Named but not located (${D.unlocated.length})</h3><p class="quiet">The gazetteer has no match near the front for these. They are usually spellings the dump does not carry.</p>`;
+    h += D.unlocated.slice(0,40).map(e=>`<div class="row"><span class="dot" style="background:#C9C4B8"></span><span class="body">${e.n}<small>${e.src} · ${dfmt(e.d)} · ${e.m==='far'?'matched, but nowhere near the line':'no gazetteer match'}</small></span></div>`).join('');
+  }
+  pbody.innerHTML=h;
+  pbody.querySelectorAll('#evtags button').forEach(b=>b.addEventListener('click',()=>{
+    const k=b.dataset.k; evFilter.has(k)?evFilter.delete(k):evFilter.add(k);
+    drawEvents(); renderReports();
+  }));
+  pbody.querySelectorAll('.row[data-lat]').forEach(b=>b.addEventListener('click',()=>{
+    map.flyTo([+b.dataset.lat,+b.dataset.lon],Math.max(map.getZoom(),10.5),{duration:.8});
+    if(isPhone()) setSheet('peek');
+  }));
+}
+
+function renderChanges(){
+  let h='';
+  if(!series.length){
+    h = `<p class="lead">No history yet.</p><p>Each run stores one snapshot of the control geometry. Day-to-day gains and losses appear from the second run onward, and the slider becomes useful after about a week.</p>`;
+  } else {
+    h = `<p class="lead">${S.ru_km2!=null?fmt(S.ru_km2)+' km² Russian-held':'—'}${S.last_change?`, unchanged since ${dfmt(S.last_change,true)}`:''}.</p>`;
+    h += `<div class="kv">${[['24 h',S.d1],['7 days',S.d7],['30 days',S.d30],['90 days',S.d90],['1 year',S.d365]].map(([k,v])=>`<b>${k}</b><span>${v==null?'not enough history':fmtS(v)+' km²'}</span>`).join('')}</div>`;
+    const byDay={}; D.changes.forEach(c=>(byDay[c.d]=byDay[c.d]||[]).push(c));
+    const days=Object.keys(byDay).sort().reverse().slice(0,14);
+    if(days.length) h+=`<h3>Day by day</h3>`;
+    for(const d of days){
+      const items=byDay[d], g=items.filter(x=>x.k==='gained').reduce((a,x)=>a+x.km2,0), l=items.filter(x=>x.k==='lost').reduce((a,x)=>a+x.km2,0);
+      h+=`<h3>${dfmt(d,true)} <span class="quiet">+${fmt(g)} / −${fmt(l)} km²</span></h3>`;
+      for(const c of items.slice(0,20)){
+        const near=nearestPlace(c.lat,c.lon);
+        h+=`<button class="row" data-lat="${c.lat}" data-lon="${c.lon}"><span class="dot" style="background:${c.k==='gained'?css('--gain'):css('--loss')}"></span><span class="body">${c.k==='gained'?'Russian advance':'Ukrainian recapture'}${near?` near ${near.n}`:''}</span><span class="meta">${c.km2} km²</span></button>`;
+      }
+    }
+  }
+  pbody.innerHTML=h;
+  pbody.querySelectorAll('.row[data-lat]').forEach(b=>b.addEventListener('click',()=>{map.flyTo([+b.dataset.lat,+b.dataset.lon],Math.max(map.getZoom(),10.5),{duration:.8});if(isPhone())setSheet('peek');}));
+}
+
+function renderLayers(){
+  const rows=[
+    ['events','Report pins','From Telegram, both sides'],
+    ['hotspots','Uncertainty blobs','Where reports cluster'],
+    ['feather','Soft edge on the line',null],
+    ['grey','Contested zone',D.uncertainty.zone.length?null:'Nothing in this build yet',!D.uncertainty.zone.length],
+    ['uaheld','Ukrainian-held inside Russia',D.control.ua_held.length?null:'None in the source',!D.control.ua_held.length],
+    ['advances','Advance axes',D.advances.length?null:'None in the source',!D.advances.length],
+    ['markers','Source markers',D.markers.length?null:'None in the source',!D.markers.length],
+    ['forts','Fortifications',fortLayer?null:'Needs the ISW layer',!fortLayer],
+    ['labels','Place names',null],
+    ['oblasts','Oblast borders',null],
+    ['rivers','Rivers and lakes',null],
+    ['roads','Roads','From zoom 7'],
+    ['urban','Built-up areas','From zoom 7'],
+  ];
+  let h=`<h3>Layers</h3>`;
+  for(const [k,label,sub,dis] of rows) h+=`<div class="tog"><div>${label}${sub?`<small>${sub}</small>`:''}</div><button class="sw2 ${layerState[k]&&!dis?'on':''}" data-k="${k}" ${dis?'disabled':''} role="switch"></button></div>`;
+  h+=`<h3>Place names</h3><div class="seg" id="langseg"><button data-l="latin" class="${nameLang==='latin'?'on':''}">Latin</button><button data-l="cyr" class="${nameLang==='cyr'?'on':''}">Cyrillic</button></div>`;
+  h+=`<h3>Background</h3><div class="seg" id="tileseg"><button data-t="none" class="${tileMode==='none'?'on':''}">Paper</button><button data-t="osm" class="${tileMode==='osm'?'on':''}">OpenStreetMap</button><button data-t="sat" class="${tileMode==='sat'?'on':''}">Satellite</button></div><p class="quiet">Paper is drawn from this file and works with no connection.</p>`;
+  pbody.innerHTML=h;
+  pbody.querySelectorAll('.sw2').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;layerState[k]=!layerState[k];b.classList.toggle('on',layerState[k]);applyLayers();}));
+  pbody.querySelectorAll('#tileseg button').forEach(b=>b.addEventListener('click',()=>setTiles(b.dataset.t)));
+  pbody.querySelectorAll('#langseg button').forEach(b=>b.addEventListener('click',()=>{nameLang=b.dataset.l;drawLabels();renderLayers();syncHash();}));
+}
+function applyLayers(){
+  const paper=tileMode==='none';
+  const on=(g,f)=>{ if(!g) return; f?g.addTo(map):map.removeLayer(g); };
+  on(oblasts,layerState.oblasts); on(rivers,layerState.rivers&&paper); on(lakes,layerState.rivers&&paper);
+  on(roads,layerState.roads&&paper&&map.getZoom()>=7); on(urban,layerState.urban&&paper&&map.getZoom()>=7);
+  drawLabels(); setMode(mode);
+}
+function setTiles(t){
+  tileMode=t; Object.values(tiles).forEach(x=>map.removeLayer(x));
+  if(t==='none') baseGroup.addTo(map); else { map.removeLayer(baseGroup); tiles[t].addTo(map); tiles[t].bringToBack(); }
+  document.querySelectorAll('#tileseg button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  applyLayers();
+}
+
+function renderSearch(){
+  pbody.innerHTML=`<input class="search" id="q" placeholder="Town or village" autocomplete="off"><div id="results"></div><p class="quiet" style="margin-top:12px">${D.places.length.toLocaleString()} places. Cyrillic works too.</p>`;
+  const q=$('#q'), res=$('#results');
+  const nrm=s=>s.toLowerCase().replace(/[’'ʼ`]/g,'');
+  q.addEventListener('input',()=>{
+    const v=nrm(q.value.trim()); res.innerHTML='';
+    if(v.length<2) return;
+    const hits=D.places.filter(p=>nrm(p.n).startsWith(v)||(p.uk&&nrm(p.uk).startsWith(v))||nrm(p.n).split(/[\s-]/).some(w=>w.startsWith(v))).slice(0,14);
+    res.innerHTML=hits.map(p=>`<button class="row" data-lat="${p.lat}" data-lon="${p.lon}" data-n="${p.n}"><span class="body">${p.n}${p.uk?` <span class="quiet">${p.uk}</span>`:''}</span><span class="meta">${p.p?fmt(p.p):''}</span></button>`).join('')||`<p class="quiet">No match.</p>`;
+    res.querySelectorAll('.row').forEach(b=>b.addEventListener('click',()=>goTo(+b.dataset.lat,+b.dataset.lon,b.dataset.n)));
+  });
+  setTimeout(()=>q.focus(),50);
+}
+let searchMarker=null;
+function goTo(lat,lon,name){
+  if(searchMarker) map.removeLayer(searchMarker);
+  searchMarker=L.marker([lat,lon],{icon:L.divIcon({className:'searchpin',iconSize:[14,14]})}).addTo(map).bindPopup(`<b>${name}</b><br>${statusAt(lat,lon)}`);
+  map.flyTo([lat,lon],10.5,{duration:.9});
+  setTimeout(()=>searchMarker.openPopup(),950);
+  if(isPhone()) setSheet('peek');
+}
+function statusAt(lat,lon){
+  const pt=[lon,lat];
+  if(D.control.ru.some(r=>inRings(pt,r))) return 'Inside Russian-held territory';
+  if(D.control.ua_held.some(r=>inRings(pt,r))) return 'Ukrainian-held, inside Russia';
+  if(D.uncertainty.zone.some(r=>inRings(pt,r))) return 'In the contested zone';
+  const near=D.control.front.length?nearestFrontKm(lat,lon):null;
+  const rep=D.events.filter(e=>Math.hypot((e.lon-lon)*74,(e.lat-lat)*111)<8).length;
+  return (near!=null? (near<3?'On the contact line':`${near.toFixed(0)} km from the contact line`) : 'No control geometry loaded') + (rep?` · ${rep} recent report${rep>1?'s':''} nearby`:'');
+}
+function inRings(pt,rings){ if(!pointInRing(pt,rings[0])) return false; for(let i=1;i<rings.length;i++) if(pointInRing(pt,rings[i])) return false; return true; }
+function pointInRing(pt,ring){let ins=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const[xi,yi]=ring[i],[xj,yj]=ring[j];if(((yi>pt[1])!==(yj>pt[1]))&&(pt[0]<(xj-xi)*(pt[1]-yi)/((yj-yi)||1e-12)+xi))ins=!ins;}return ins;}
+function nearestFrontKm(lat,lon){let bd=1e9;const kx=111.32*Math.cos(lat*Math.PI/180);for(const line of D.control.front)for(const[x,y]of line){const d=Math.hypot((x-lon)*kx,(y-lat)*110.57);if(d<bd)bd=d;}return bd;}
+function nearestPlace(lat,lon){let best=null,bd=1e9;const kx=111.32*Math.cos(lat*Math.PI/180);for(const p of D.places){const d=Math.hypot((p.lon-lon)*kx,(p.lat-lat)*110.57);if(d<bd){bd=d;best=p;}}return best&&bd<25?best:null;}
+
+function renderSources(){
+  let h=`<h3>Where the geometry comes from</h3>`;
+  const whence = S.base_source==='kalibrated' ? 'the Kalibrated map, straight from its Google My Maps KML' : 'the ISW assessed-control layer';
+  h+='<p>' + (D.control.ru.length ? 'Control polygons are read from ' + whence + '. Nothing is redrawn by hand.' : 'No control source has been fetched yet.') + '</p>';
+  const B = D.balance;
+  if (B){
+    h+=`<h3>Source balance</h3><p>What each side actually contributed to this build. If one column is thin, the map is leaning.</p>`;
+    const geo = B.geometry||{};
+    h+=`<div class="src"><b>Base geometry</b><span>${geo.base||'none'}</span></div>`;
+    h+=`<div class="src"><b>Russian-side geometry</b><span class="${geo.russian?'ok':'bad'}">${(geo.russian||['not fetched']).join(', ')}</span></div>`;
+    h+=`<div class="src"><b>Claims layer</b><span>${geo.claims||'none'}</span></div>`;
+    for (const [k,label] of [['ru','Russian sources'],['ua','Ukrainian sources'],['mapper','Mapper sources']]){
+      const b=B[k]||{located:0,unmatched:0,sources:[]};
+      h+=`<div class="src"><b>${label}</b><span class="${b.located?'ok':'bad'}">${b.located} located, ${b.unmatched} unmatched<br><span class="quiet">${b.sources.join(', ')||'nothing read'}</span></span></div>`;
+    }
+  }
+  h+=`<h3>Feeds</h3>`;
+  for(const [k,v] of Object.entries(D.sources)) h+=`<div class="src"><b>${k.replace(/_/g,' ')}</b><span class="${/missing|failed/.test(String(v))?'bad':'ok'}">${v}</span></div>`;
+  if (D.classification.length){
+    h+=`<h3>How each source layer was read</h3>`;
+    for(const c of D.classification) h+=`<div class="src"><b>${c.layer}</b><span>${c.class||'ignored'} <span class="quiet">(${c.why})</span></span></div>`;
+  }
+  h+=`<h3>Uncertainty</h3><p>The soft edge is drawn from the contact line outward. The contested zone is the union of any grey-zone layer in the source, places where two sources disagree, and clusters of recent reports. Nothing there is an assertion of control.</p>`;
+  h+=`<h3>Built</h3><p>${D.built}</p>`;
+  pbody.innerHTML=h;
+}
+
+// panel open/close and phone sheet
+let panelOpen=!isPhone();
+function setPanelOpen(o){panelOpen=o;panel.classList.toggle('closed',!o&&!isPhone());document.body.classList.toggle('panel-open',o&&!isPhone());$('#opener').style.display=(!o&&!isPhone())?'flex':'none';}
+$('#pclose').addEventListener('click',()=>setPanelOpen(false));
+$('#opener').addEventListener('click',()=>setPanelOpen(true));
+let sheet='peek';
+const SHEETS={peek:()=>84,half:()=>Math.round(innerHeight*.48),full:()=>Math.round(innerHeight*.9)};
+function setSheet(s){sheet=s;document.documentElement.style.setProperty('--sheet',SHEETS[s]()+'px');document.documentElement.style.setProperty('--peek',(s==='peek'?84:0)+'px');$('#ribbon').style.display=s==='peek'?'':'none';}
+const grab=$('#grab');
+let gy0=null,gh0=0;
+grab.addEventListener('pointerdown',e=>{gy0=e.clientY;gh0=panel.getBoundingClientRect().height;grab.setPointerCapture(e.pointerId);panel.style.transition='none';});
+grab.addEventListener('pointermove',e=>{if(gy0===null)return;const h=Math.max(60,Math.min(innerHeight*.92,gh0+(gy0-e.clientY)));document.documentElement.style.setProperty('--sheet',h+'px');});
+grab.addEventListener('pointerup',e=>{panel.style.transition='';if(gy0===null)return;const dy=gy0-e.clientY;gy0=null;
+  if(Math.abs(dy)<8){setSheet(sheet==='peek'?'half':sheet==='half'?'full':'peek');return;}
+  const h=panel.getBoundingClientRect().height;setSheet(h<innerHeight*.3?'peek':h<innerHeight*.7?'half':'full');});
+addEventListener('resize',()=>{if(isPhone()){setSheet(sheet);panel.classList.remove('closed');$('#opener').style.display='none';}else{document.documentElement.style.removeProperty('--sheet');document.documentElement.style.removeProperty('--peek');$('#ribbon').style.display='';setPanelOpen(panelOpen);}});
+$('#zin').addEventListener('click',()=>map.zoomIn()); $('#zout').addEventListener('click',()=>map.zoomOut());
+
+// URL state
+function syncHash(){
+  const p=new URLSearchParams({m:mode,t:tab,l:nameLang});
+  if(anchorIdx>=0&&anchors.length) p.set('d',anchors[anchorIdx].d);
+  const c=map.getCenter(); p.set('v',`${c.lat.toFixed(3)},${c.lng.toFixed(3)},${map.getZoom()}`);
+  history.replaceState(null,'','#'+p.toString());
+}
+map.on('moveend',syncHash);
+function readHash(){
+  if(!location.hash) return;
+  const p=new URLSearchParams(location.hash.slice(1));
+  if(p.get('l')) nameLang=p.get('l');
+  if(p.get('v')){const[a,b,z]=p.get('v').split(',').map(Number); if(!isNaN(a)) map.setView([a,b],z);}
+  if(p.get('t')) tab=p.get('t');
+  if(p.get('d')){const i=anchors.findIndex(x=>x.d===p.get('d')); if(i>=0) anchorIdx=i;}
+  if(p.get('m')) mode=p.get('m');
+}
+
+// go
+readHash();
+if(isPhone()){setSheet('peek');$('#hdr').classList.add('folded');$('#fold').textContent='More';} else setPanelOpen(true);
+renderPanel(); setMode(mode); drawLabels();
+})();
+</script>
+</body>
+</html>

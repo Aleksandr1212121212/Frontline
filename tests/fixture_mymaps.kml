@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+<name>Kalibrated Ukraine Map 2.0</name>
+<Style id="poly-C2185B-1200-77-normal"><LineStyle><color>ff5b18c2</color><width>1.2</width></LineStyle><PolyStyle><color>4d5b18c2</color></PolyStyle></Style>
+<StyleMap id="poly-C2185B-1200-77"><Pair><key>normal</key><styleUrl>#poly-C2185B-1200-77-normal</styleUrl></Pair><Pair><key>highlight</key><styleUrl>#poly-C2185B-1200-77-normal</styleUrl></Pair></StyleMap>
+<Style id="blue"><LineStyle><color>ffff6a3a</color></LineStyle><PolyStyle><color>66ff6a3a</color></PolyStyle></Style>
+<Folder><name>Russian Control</name>
+  <Placemark><name>Occupied east</name><description><![CDATA[As of <b>05.09.2026</b><br>source: geolocated]]></description><styleUrl>#poly-C2185B-1200-77</styleUrl>
+    <ExtendedData><Data name="updated"><value>2026-09-05</value></Data></ExtendedData>
+    <Polygon><outerBoundaryIs><LinearRing><coordinates>
+      37.0,48.0,0 38.5,48.0,0 38.5,49.0,0 37.0,49.0,0 37.0,48.0,0
+    </coordinates></LinearRing></outerBoundaryIs>
+    <innerBoundaryIs><LinearRing><coordinates>37.4,48.4,0 37.6,48.4,0 37.6,48.6,0 37.4,48.6,0 37.4,48.4,0</coordinates></LinearRing></innerBoundaryIs></Polygon></Placemark>
+  <Placemark><name>Sumy salient</name><styleUrl>#poly-C2185B-1200-77</styleUrl>
+    <MultiGeometry>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>34.6,50.9 35.2,50.9 35.2,51.2 34.6,51.2 34.6,50.9</coordinates></LinearRing></outerBoundaryIs></Polygon>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>35.3,50.95 35.5,50.95 35.5,51.05 35.3,51.05 35.3,50.95</coordinates></LinearRing></outerBoundaryIs></Polygon>
+    </MultiGeometry></Placemark>
+</Folder>
+<Folder><name>Ukrainian Control (Russian territory)</name>
+  <Placemark><name>Kursk pocket</name><styleUrl>#blue</styleUrl>
+    <Polygon><outerBoundaryIs><LinearRing><coordinates>35.0,51.3 35.4,51.3 35.4,51.6 35.0,51.6 35.0,51.3</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
+</Folder>
+<Folder><name>Contested / Grey Zone</name>
+  <Placemark><name>Kostiantynivka approaches</name><styleUrl>#poly-C2185B-1200-77</styleUrl>
+    <Polygon><outerBoundaryIs><LinearRing><coordinates>37.6,48.5 37.9,48.5 37.9,48.8 37.6,48.8 37.6,48.5</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
+</Folder>
+<Folder><name>Russian Advances</name>
+  <Placemark><name>Axis toward Novomykolaivka</name>
+    <LineString><coordinates>35.79,47.57 35.83,47.75 35.87,47.95</coordinates></LineString></Placemark>
+  <Placemark><name>Kurtivka</name><description>Captured 04.09.2026</description>
+    <Point><coordinates>37.62,48.63,0</coordinates></Point></Placemark>
+</Folder>
+</Document></kml>

@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+shots/
+tests/live/
+tests/live_empty/
