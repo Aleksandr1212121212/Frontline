@@ -102,6 +102,15 @@ check("build: russian reading measured against base", data["stats"]["ru_ahead_km
 check("build: both sides counted", data["balance"]["ru"]["located"] > 0 and data["balance"]["ua"]["located"] > 0)
 check("build: russian geometry named in balance", bool(data["balance"]["geometry"]["russian"]))
 
+lk = data["stats"]["lean_km2"]
+check("leans: four rules produced", set(lk) == {"confirmed", "balanced", "forward", "maximal"}, str(lk))
+check("leans: ordered cautious to overstated", lk["confirmed"] <= lk["balanced"] <= lk["forward"] <= lk["maximal"], str(lk))
+check("leans: forward exceeds confirmed when sources differ", lk["forward"] > lk["confirmed"], str(lk))
+check("leans: each rule has its own front line", all(data["ours"][k]["front"] for k in ("confirmed", "balanced", "forward", "maximal")))
+check("compare: one outline per source", len(data["source_layers"]) == 4, str([s["id"] for s in data["source_layers"]]))
+check("compare: claims layer marked as claims", any(s["kind"] == "claims" for s in data["source_layers"]))
+check("compare: per-place verdicts carry every source", all(len(p["says"]) == 4 for p in data["perspectives"]) if data["perspectives"] else True)
+
 html = open(os.path.join(ROOT, "out", "index.html"), encoding="utf-8").read()
 check("page: data embedded", '"have_control"' in html)
 check("page: leaflet inlined", "L.Map" in html or "leaflet" in html.lower())

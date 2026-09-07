@@ -25,7 +25,28 @@ own gazetteer, and works with no connection.
 Nothing is traced by hand and nothing is drawn from a screenshot. If a source is unreachable the page still builds,
 says so on its face, and keeps the previous good data.
 
-## The three readings
+## We draw our own line
+
+Every source that publishes geometry is loaded separately, then our line is derived from all of them by a rule you
+pick in the header. Same inputs, four honest readings:
+
+| Rule | What it draws |
+|---|---|
+| **Confirmed** | only ground at least two source maps agree on |
+| **Balanced** | ground a majority of the source maps place under Russian control (the default) |
+| **Forward** | anything any source map draws as Russian-held |
+| **Maximal** | all of the above plus unconfirmed claims and reported captures, deliberately overstated |
+
+The header shows the km² each rule gives and the spread between the most cautious and the most generous, which is
+the honest size of the interpretation gap.
+
+## Compare tab
+
+Switch on any source to draw its outline over our line and see exactly where it disagrees. Below that is the list of
+settlements the sources read differently: each one shows every source's verdict (held / not held) and the reports
+that mention it, dated and linked. Tap a place for the same thing as a popup on the map.
+
+## Supporting views
 
 - **Map** — the base control geometry as the source map draws it, with a soft edge along the contact line and
   contested areas shaded rather than assigned to a side.

@@ -77,6 +77,7 @@ def classify_layer(name, features):
 def load_mymaps(want_russian=False):
     """My Maps sources in live/, classified. want_russian selects the Russian-side maps instead of the base ones."""
     out = {c: [] for c in CLASSES}
+    by_source = defaultdict(list)
     points, linefeats, report, sources = [], [], [], {}
     for path in sorted(glob.glob(os.path.join(LIVE, "*.json"))):
         base = os.path.basename(path)
@@ -105,13 +106,17 @@ def load_mymaps(want_russian=False):
             report.append({"source": src, "layer": layer["name"], "class": cls, "why": why,
                            "polygons": len(polys_), "lines": len(lines_), "points": len(pts_)})
             if cls and polys_:
-                out[cls].append(G.from_rings(polys_))
+                g = G.from_rings(polys_)
+                out[cls].append(g)
+                if cls == "ru_control":
+                    by_source[src].append(g)
             linefeats.extend(lines_)
             points.extend(pts_)
     geom = {}
     for c in CLASSES:
         geom[c] = G.polys(G.valid(unary_union(out[c])), C.MIN_POLY_KM2) if out[c] else MultiPolygon()
-    return geom, points, linefeats, report, sources
+    per_src = {k: G.polys(G.valid(unary_union(v)), C.MIN_POLY_KM2) for k, v in by_source.items() if v}
+    return geom, points, linefeats, report, sources, per_src
 
 
 def load_isw():
@@ -280,11 +285,11 @@ def main(self_test=False):
     log(f"gazetteer: {len(gaz.places)} places ({'full' if gaz.full else 'seed, pop>1000 only'})")
 
     log("my maps sources…")
-    my, my_points, my_lines, class_report, my_sources = load_mymaps()
+    my, my_points, my_lines, class_report, my_sources, per_source = load_mymaps()
     for r in class_report:
         log(f"  {r['source']}: {r['layer']!r} -> {r['class'] or 'IGNORED'} ({r['why']}; "
             f"{r['polygons']}p {r['lines']}l {r['points']}pt)")
-    ru_my, ru_points, ru_lines, ru_class_report, ru_sources = load_mymaps(want_russian=True)
+    ru_my, ru_points, ru_lines, ru_class_report, ru_sources, ru_per_source = load_mymaps(want_russian=True)
     for r in ru_class_report:
         log(f"  [ru] {r['source']}: {r['layer']!r} -> {r['class'] or 'IGNORED'} ({r['why']}; "
             f"{r['polygons']}p {r['lines']}l {r['points']}pt)")
@@ -309,6 +314,19 @@ def main(self_test=False):
     if have_control:
         inner = G.ea(ukraine).buffer(-2500)
         front = G.lines(G.ll(G.ea(ru).boundary.intersection(inner)))
+
+    # ---- every source's own reading of Russian-held ground, kept separately
+    readings = []
+    for src, doc_geom in per_source.items():
+        if not doc_geom.is_empty:
+            readings.append({"id": src, "kind": "map", "geom": doc_geom})
+    for src, doc_geom in ru_per_source.items():
+        if not doc_geom.is_empty:
+            readings.append({"id": src, "kind": "map", "geom": doc_geom})
+    if "control" in isw:
+        readings.append({"id": "isw_control", "kind": "map", "geom": G.polys(isw["control"], C.MIN_POLY_KM2)})
+    if "claimed" in isw:
+        readings.append({"id": "isw_claimed", "kind": "claims", "geom": G.polys(isw["claimed"], C.MIN_POLY_KM2)})
 
     # the Russian-side reading of the same ground
     ru_read = ru_my["ru_control"]
@@ -356,6 +374,105 @@ def main(self_test=False):
                      "claims": "isw" if "claimed" in isw else ("source map" if not my["ru_claimed"].is_empty else None)},
     }
 
+    # ---- our own map: four rules over the same inputs
+    log("our line…")
+    map_reads = [r for r in readings if r["kind"] == "map"]
+    claim_reads = [r for r in readings if r["kind"] == "claims"]
+    n_maps = len(map_reads)
+
+    def coverage_at_least(k):
+        """Ground that at least k of the map sources place under Russian control."""
+        if n_maps == 0 or k <= 0:
+            return MultiPolygon()
+        if k == 1:
+            return G.polys(G.valid(unary_union([r["geom"] for r in map_reads])), C.MIN_POLY_KM2)
+        acc = MultiPolygon()
+        seen = []
+        for r in map_reads:
+            g = G.ea(r["geom"])
+            for prev in seen:
+                acc = G.polys(G.valid(G.ll(unary_union([G.ea(acc), g.intersection(prev)]))), C.MIN_POLY_KM2) if k == 2 else acc
+            seen.append(g)
+        if k == 2:
+            return acc
+        # k >= 3: count overlaps pairwise-free by summing indicator via successive intersections
+        from itertools import combinations
+        parts = []
+        for combo in combinations(seen, k):
+            inter = combo[0]
+            for g in combo[1:]:
+                inter = inter.intersection(g)
+                if inter.is_empty:
+                    break
+            if not inter.is_empty:
+                parts.append(inter)
+        return G.polys(G.valid(G.ll(unary_union(parts))), C.MIN_POLY_KM2) if parts else MultiPolygon()
+
+    event_taken = MultiPolygon()
+    taken_pts = [Point(e["lon"], e["lat"]) for e in events
+                 if e["kind"] in ("ru_taken", "ru_advance") and e["side"] in ("ru", "mapper")]
+    if taken_pts:
+        event_taken = G.polys(G.valid(G.buffer_km(unary_union(taken_pts), 3.0)), 0.2)
+
+    majority = max(2, (n_maps + 1) // 2) if n_maps > 1 else 1
+    leans = {}
+    leans["confirmed"] = coverage_at_least(min(2, n_maps))
+    leans["balanced"] = coverage_at_least(majority)
+    leans["forward"] = coverage_at_least(1)
+    maximal_parts = [g for g in [leans["forward"]] + [r["geom"] for r in claim_reads] + [event_taken] if not g.is_empty]
+    leans["maximal"] = G.polys(G.valid(unary_union(maximal_parts)), C.MIN_POLY_KM2) if maximal_parts else MultiPolygon()
+
+    lean_out = {}
+    for k, g in leans.items():
+        front_k = MultiLineString()
+        if not g.is_empty:
+            front_k = G.lines(G.ll(G.ea(g).boundary.intersection(G.ea(ukraine).buffer(-2500))))
+        lean_out[k] = {"c": G.poly_coords(G.simplify_m(g, 200), 5),
+                       "front": G.line_coords(G.simplify_m(front_k, 200), 5),
+                       "km2": round(G.km2(g)) if not g.is_empty else 0,
+                       "front_km": round(G.km(front_k)) if not front_k.is_empty else 0}
+    lean_out["_meta"] = {"n_maps": n_maps, "majority": majority,
+                         "sources": [r["id"] for r in map_reads], "claims": [r["id"] for r in claim_reads],
+                         "events_used": len(taken_pts)}
+
+    # ---- per-source outlines for the toggles
+    source_layers = [{"id": r["id"], "kind": r["kind"],
+                      "km2": round(G.km2(r["geom"])),
+                      "c": G.poly_coords(G.simplify_m(r["geom"], 400), 4)} for r in readings]
+
+    # ---- per-place perspective: what each source says about one settlement
+    log("perspectives…")
+    perspectives = []
+    if readings:
+        span = G.polys(G.valid(unary_union([r["geom"] for r in readings])))
+        band = G.ea(span.boundary).buffer(35000)
+        prepared = [(r["id"], G.ea(r["geom"])) for r in readings]
+        ev_by_place = defaultdict(list)
+        for e in events:
+            ev_by_place[(round(e["lat"], 3), round(e["lon"], 3))].append(e)
+        cands = [p for p in gaz.places if p["p"] >= 500]
+        for p in cands:
+            pt = G.ea(Point(p["lon"], p["lat"]))
+            if not band.contains(pt):
+                continue
+            says = {sid: ("in" if g.contains(pt) else "out") for sid, g in prepared}
+            local = []
+            for (lat, lon), items in ev_by_place.items():
+                if abs(lat - p["lat"]) < .07 and abs(lon - p["lon"]) < .10:
+                    local.extend(items)
+            if len(set(says.values())) < 2 and not local:
+                continue          # everyone agrees and nothing was reported: not interesting
+            perspectives.append({
+                "n": p["n"], "uk": p.get("uk", ""), "lat": p["lat"], "lon": p["lon"], "p": p["p"],
+                "says": says,
+                "reports": sorted(({"d": e["d"], "k": e["kind"], "s": e["side"], "src": e["src"], "u": e["url"]}
+                                   for e in local), key=lambda x: x["d"], reverse=True)[:6],
+            })
+            if len(perspectives) >= 400:
+                break
+        perspectives.sort(key=lambda x: (-len(x["reports"]), -x["p"]))
+    log(f"  {len(perspectives)} places where sources disagree or something was reported")
+
     log("history…")
     save_snapshot(ru, uncertain, base_source)
     series, anchors, changes, last_change = build_history(ru) if have_control else ([], [], [], None)
@@ -382,6 +499,7 @@ def main(self_test=False):
         "d1": delta(1), "d7": delta(7), "d30": delta(30), "d90": delta(90), "d365": delta(365),
         "since": series[0]["d"] if series else None,
         "n_snapshots": len(series),
+        "lean_km2": {k: v["km2"] for k, v in lean_out.items() if not k.startswith("_")},
         "last_change": last_change,
         "crimea_km2": round(G.km2(ru.intersection(crimea))) if have_control else None,
     }
@@ -402,6 +520,9 @@ def main(self_test=False):
             "claim_gap": G.poly_coords(G.simplify_m(claim_gap, 400), 4) if not claim_gap.is_empty else [],
             "hotspots": hotspots[:60],
         },
+        "ours": lean_out,
+        "source_layers": source_layers,
+        "perspectives": perspectives,
         "russian_read": {
             "control": G.poly_coords(ru_read, 5),
             "ahead": G.poly_coords(G.simplify_m(ru_ahead, 300), 4) if not ru_ahead.is_empty else [],

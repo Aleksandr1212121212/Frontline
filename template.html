@@ -55,6 +55,17 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .seg button:disabled{color:var(--ink-3);cursor:not-allowed}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .modenote{margin:8px 0 0;font-size:12px;color:var(--ink-2)}
+.persp-btn{margin-top:8px;width:100%;padding:8px;border-radius:8px;background:#E8E6DF;font-size:12.5px;font-weight:500;color:var(--ink-2);display:flex;justify-content:center;gap:6px}
+.persp-btn:hover{background:#E0DDD4}
+.persp-btn span{color:var(--ink-3)}
+.srcrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--rule);font-size:13px}
+.srcrow .chip{width:22px;height:10px;border-radius:2px;flex:none}
+.srcrow .km{margin-left:auto;color:var(--ink-3);font-size:11.5px;font-variant-numeric:tabular-nums}
+.verdict{display:inline-block;padding:1px 6px;border-radius:9px;font-size:11px;font-weight:500;margin-left:6px}
+.v-in{background:#F2DEDE;color:#8A2B2B}.v-out{background:#DFE8F2;color:#2C5578}
+.leanbar{display:flex;gap:2px;margin:8px 0 2px;font-size:11px;color:var(--ink-3)}
+.leanbar div{flex:1;text-align:center}
+.leanbar b{display:block;color:var(--ink);font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums}
 .modenote.hide{display:none}
 .hdr .fold{display:none}
 .warn{margin:8px 0 0;padding:8px 10px;border-radius:8px;background:#F6EFE2;color:#6B5836;font-size:12px}
@@ -79,8 +90,9 @@ button{cursor:pointer;background:none;border:0;padding:0}
 
 .panel{position:fixed;right:14px;top:14px;bottom:14px;z-index:1000;width:min(370px,calc(100vw - 28px));background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;transition:transform .28s cubic-bezier(.2,.7,.2,1)}
 .panel.closed{transform:translateX(calc(100% + 14px))}
-.ptabs{display:flex;gap:2px;padding:8px 8px 0;border-bottom:1px solid var(--rule)}
-.ptabs button{padding:8px 7px;font-size:12.5px;font-weight:500;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.ptabs{display:flex;gap:1px;padding:8px 6px 0;border-bottom:1px solid var(--rule);overflow-x:auto;scrollbar-width:none}
+.ptabs::-webkit-scrollbar{display:none}
+.ptabs button{padding:8px 6px;font-size:12.5px;font-weight:500;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
 .ptabs button.on{color:var(--ink);border-color:var(--ink)}
 .ptabs .close{margin-left:auto;color:var(--ink-3);font-size:18px;padding:4px 6px}
 .pbody{overflow:auto;padding:12px 14px 18px;flex:1;-webkit-overflow-scrolling:touch}
@@ -149,12 +161,14 @@ body.panel-open .ribbon{right:calc(14px + min(370px,calc(100vw - 28px)) + 10px)}
   <button class="fold" id="fold">Less</button>
   <h1>Front line <span id="asof"></span></h1>
   <div class="stats" id="stats"></div>
-  <div class="seg" role="tablist" aria-label="Reading">
-    <button class="on" data-mode="base" role="tab">Map</button>
-    <button data-mode="claimed" role="tab">Claimed</button>
-    <button data-mode="ru" role="tab">Russian reporting</button>
+  <div class="seg" role="tablist" aria-label="How our line is drawn">
+    <button data-lean="confirmed" role="tab">Confirmed</button>
+    <button class="on" data-lean="balanced" role="tab">Balanced</button>
+    <button data-lean="forward" role="tab">Forward</button>
+    <button data-lean="maximal" role="tab">Maximal</button>
   </div>
   <p class="modenote hide" id="modenote"></p>
+  <button class="persp-btn" id="perspbtn">Other perspectives <span id="perspn"></span></button>
   <div id="warnbox"></div>
 </section>
 
@@ -174,6 +188,7 @@ body.panel-open .ribbon{right:calc(14px + min(370px,calc(100vw - 28px)) + 10px)}
 <aside class="panel" id="panel">
   <div class="grab" id="grab"></div>
   <div class="ptabs" id="ptabs">
+    <button data-tab="perspectives">Compare</button>
     <button class="on" data-tab="reports">Reports</button>
     <button data-tab="changes">Changes</button>
     <button data-tab="layers">Layers</button>
@@ -200,7 +215,7 @@ const fmt = n => n==null ? '–' : Math.round(n).toLocaleString('en-US');
 const fmtS = n => n==null ? '–' : (n>0?'+':n<0?'−':'') + Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:Math.abs(n)<10?1:0});
 const dfmt = (iso,long) => { if(!iso) return '—'; const [y,m,d]=iso.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('en-GB', long?{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}:{day:'numeric',month:'short',timeZone:'UTC'}); };
 const isPhone = () => window.matchMedia('(max-width:820px)').matches;
-let mode='base', tab='reports', nameLang='latin';
+let lean='balanced', tab='reports', nameLang='latin';
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const UKRAINE_KM2 = 603628;
 
@@ -329,70 +344,74 @@ map.on('zoomend', ()=>{ const z=map.getZoom(); const paper=tileMode==='none';
 });
 drawLabels();
 
-// ---------- modes
-const NOTES = {
-  base: D.control.ru.length ? '' : 'No control geometry in this build. Everything below is text reporting until the pipeline fetches the map source.',
-  claimed: (D.control.claimed.length||D.isw.claimed) ? 'Territory claimed as Russian-held. Where the claim runs ahead of the mapped line, the gap is filled in.' : 'No claim layer yet. It arrives with ISW or with a claims layer on the source map.',
-  ru: (D.russian_read && D.russian_read.control.length)
-        ? `Read from the Russian-side control map${D.stats.ru_ahead_km2 ? `, which runs ${fmt(D.stats.ru_ahead_km2)} km² ahead of the base map` : ''}, plus reports from Russian channels. Edges are soft where the two readings disagree.`
-        : 'Russian-side reading: claims plus reports from Russian channels. The Russian control map has not been fetched yet.'
+// ---------- our line, four readings of the same inputs
+const OURS = D.ours || {};
+const LEAN_TEXT = {
+  confirmed: 'Only ground at least two source maps agree on. The most cautious reading.',
+  balanced:  'Ground a majority of the source maps place under Russian control.',
+  forward:   'Anything any source map draws as Russian-held.',
+  maximal:   'Every source map, plus unconfirmed claims and reported captures. Deliberately overstated.'
 };
-function setMode(m){
-  mode=m;
-  document.querySelectorAll('.seg[role=tablist] button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
-  const note=$('#modenote'); note.textContent=NOTES[m]||''; note.classList.toggle('hide',!NOTES[m]);
-  [ruControl,uaHeld,frontLine,claimedLayer,claimGap,disagree,greyZone,featherGroup,hotGroup,advGroup,markerGroup,evGroup,iswClaimed,fortLayer,ruRead,ruAhead,ruAheadFeather,ruAdv].forEach(l=>{ if(l&&map.hasLayer(l)) map.removeLayer(l); });
-  if (D.control.ru.length) ruControl.addTo(map);
+const ourFill = L.polygon([], {renderer:canvas, fillColor:css('--ru'), fillOpacity:.24, color:css('--ru'), weight:.7, opacity:.5, interactive:false});
+const ourFront = L.polyline([], {renderer:canvas, color:css('--ru'), weight:2.4, interactive:false});
+const SRC_COLOURS = ['#9E2A2B','#2F6FB0','#B4574E','#4C7A5B','#7B5EA7','#C08A2E','#4B4F55'];
+const srcLayers = {};
+(D.source_layers||[]).forEach((sl,i)=>{
+  srcLayers[sl.id] = {colour:SRC_COLOURS[i%SRC_COLOURS.length], km2:sl.km2, kind:sl.kind,
+    layer:L.polygon(polys2ll(sl.c),{renderer:canvas,fill:false,color:SRC_COLOURS[i%SRC_COLOURS.length],weight:1.8,opacity:.95,dashArray:sl.kind==='claims'?'5 4':null,interactive:false})};
+});
+const srcOn = new Set();
+
+function setLean(k){
+  if(!OURS[k]) return;
+  lean = k;
+  document.querySelectorAll('.seg[role=tablist] button').forEach(b=>b.classList.toggle('on',b.dataset.lean===k));
+  ourFill.setLatLngs(polys2ll(OURS[k].c)); ourFront.setLatLngs(lines2ll(OURS[k].front));
+  if(!map.hasLayer(ourFill) && OURS[k].c.length){ ourFill.addTo(map); ourFront.addTo(map); }
+  const note=$('#modenote');
+  const meta=OURS._meta||{};
+  note.textContent = `${LEAN_TEXT[k]} ${fmt(OURS[k].km2)} km² from ${meta.n_maps||0} source map${meta.n_maps===1?'':'s'}.`;
+  note.classList.remove('hide');
+  renderStats(); drawLegend(); syncHash();
+  if(tab==='perspectives') renderPerspectives();
+}
+document.querySelectorAll('.seg[role=tablist] button').forEach(b=>{
+  if(!OURS[b.dataset.lean] || !OURS[b.dataset.lean].c.length) b.disabled = true;
+  b.addEventListener('click',()=>setLean(b.dataset.lean));
+});
+
+function applySourceLayers(){
+  Object.entries(srcLayers).forEach(([id,o])=>{ if(srcOn.has(id)) o.layer.addTo(map); else map.removeLayer(o.layer); });
+  drawLegend();
+}
+$('#perspbtn').addEventListener('click',()=>{ tab='perspectives'; renderPanel(); setPanelOpen(true); if(isPhone()) setSheet('half'); });
+$('#perspn').textContent = (D.perspectives||[]).length ? `(${D.perspectives.length} places differ)` : '';
+
+// the supporting layers keep working, just not as separate "modes"
+function baseLayersForLean(){
+  [uaHeld,greyZone,featherGroup,hotGroup,advGroup,markerGroup,evGroup,fortLayer,ruAdv].forEach(l=>{ if(l&&map.hasLayer(l)) map.removeLayer(l); });
   if (layerState.uaheld && D.control.ua_held.length) uaHeld.addTo(map);
-  if (D.control.front.length) frontLine.addTo(map);
-  if (layerState.feather && m!=='claimed') featherGroup.addTo(map);
   if (layerState.grey) greyZone.addTo(map);
-  if (m==='claimed'){
-    if (D.control.claimed.length) claimedLayer.addTo(map);
-    else if (iswClaimed) iswClaimed.addTo(map);
-    if (D.uncertainty.claim_gap.length) claimGap.addTo(map);
-    if (D.uncertainty.disagreement.length) disagree.addTo(map);
-  }
-  if (m==='ru'){
-    if (ruRead) ruRead.addTo(map);
-    if (ruAhead) { ruAheadFeather.addTo(map); ruAhead.addTo(map); }
-    if (!ruRead && D.control.claimed.length) claimedLayer.addTo(map);
-    if (layerState.hotspots) hotGroup.addTo(map);
-    if (layerState.advances) { advGroup.addTo(map); ruAdv.addTo(map); }
-    sideFilter = new Set(['ru','mapper']);
-  } else {
-    sideFilter = new Set(['ru','ua','mapper']);
-    if (layerState.hotspots) hotGroup.addTo(map);
-    if (layerState.advances) advGroup.addTo(map);
-  }
+  if (layerState.feather && lean!=='maximal') featherGroup.addTo(map);
+  if (layerState.hotspots) hotGroup.addTo(map);
+  if (layerState.advances){ advGroup.addTo(map); ruAdv.addTo(map); }
   if (layerState.markers) markerGroup.addTo(map);
   if (layerState.forts && fortLayer) fortLayer.addTo(map);
   if (layerState.events){ drawEvents(); evGroup.addTo(map); }
-  ruControl.setStyle({fillOpacity: m==='ru' ? .3 : (tileMode==='sat'?.34:.24)});
-  drawLegend(); syncHash();
-  if (tab==='reports' && pbody) renderReports();
+  applySourceLayers();
 }
-document.querySelectorAll('.seg[role=tablist] button').forEach(b=>{
-  const m=b.dataset.mode;
-  if(m==='claimed' && !(D.control.claimed.length||D.isw.claimed)) b.disabled=true;
-  b.addEventListener('click',()=>setMode(m));
-});
-$('.seg[role=tablist]').addEventListener('pointerdown',e=>{const b=e.target.closest('button'); if(b&&b.disabled){$('#modenote').textContent=NOTES.claimed;$('#modenote').classList.remove('hide');}});
 
 function drawLegend(){
   const L_=[];
-  if (D.control.ru.length) {
-    L_.push(`<div><span class="sw" style="background:${css('--ru-soft')};outline:1px solid ${css('--ru')}"></span>Russian-held (${S.base_source==='kalibrated'?'Kalibrated':'ISW'})</div>`);
+  if ((OURS[lean]||{c:[]}).c.length) {
+    L_.push(`<div><span class="sw" style="background:${css('--ru-soft')};outline:1px solid ${css('--ru')}"></span>Our line, ${lean}</div>`);
     L_.push(`<div><span class="ln" style="border-color:${css('--ru')}"></span>Contact line</div>`);
   }
   if (D.control.ua_held.length && layerState.uaheld) L_.push(`<div><span class="sw" style="background:${css('--ua-soft')};outline:1px solid ${css('--ua')}"></span>Ukrainian-held inside Russia</div>`);
-  if (layerState.feather && mode!=='claimed' && D.uncertainty.feather.length) L_.push(`<div><span class="sw" style="background:rgba(158,42,43,.10)"></span>Soft edge, control unclear</div>`);
+  if (layerState.feather && lean!=='maximal' && D.uncertainty.feather.length) L_.push(`<div><span class="sw" style="background:rgba(158,42,43,.10)"></span>Soft edge, control unclear</div>`);
   if (layerState.grey && D.uncertainty.zone.length) L_.push(`<div><span class="sw" style="background:rgba(138,127,114,.3);outline:1px dashed ${css('--unsure')}"></span>Contested / reported fighting</div>`);
-  if (mode==='claimed') L_.push(`<div><span class="sw" style="background:rgba(180,87,78,.28);outline:1px dashed ${css('--claim')}"></span>Claimed beyond the mapped line</div>`);
-  if (mode==='ru' && RR.control.length){
-    L_.push(`<div><span class="sw" style="background:rgba(158,42,43,.20);outline:1px solid ${css('--ru')}"></span>Russian-side control map</div>`);
-    if (RR.ahead.length) L_.push(`<div><span class="sw" style="background:rgba(180,87,78,.3);outline:1px dashed ${css('--claim')}"></span>Ahead of the base map, soft-edged</div>`);
-  }
+  if (lean==='maximal' && D.stats.claim_gap_km2) L_.push(`<div><span class="sw" style="background:rgba(180,87,78,.28);outline:1px dashed ${css('--claim')}"></span>Includes unconfirmed claims</div>`);
+  srcOn.forEach(id=>{ const o=srcLayers[id]; if(o) L_.push(`<div><span class="ln${o.kind==='claims'?' dash':''}" style="border-color:${o.colour}"></span>${id.replace(/^rumap_/,'')}</div>`); });
   if (layerState.events) L_.push(`<div><span class="sw" style="border-radius:50%;width:10px;height:10px;background:#fff;outline:2px solid ${css('--ru')}"></span>Report pin, tap for the post</div>`);
   $('#legend').innerHTML = L_.join('');
   $('#legend').style.display = L_.length ? '' : 'none';
@@ -402,8 +421,11 @@ function drawLegend(){
 $('#asof').textContent = 'as of ' + dfmt(S.date,true);
 function renderStats(){
   const rows=[];
-  if (S.ru_km2!=null) rows.push([fmt(S.ru_km2),`km² Russian-held · ${(100*S.ru_km2/UKRAINE_KM2).toFixed(1)}% of Ukraine`]);
-  if (S.front_km!=null) rows.push([fmt(S.front_km),'km of contact line']);
+  const cur = OURS[lean];
+  if (cur && cur.c.length) rows.push([fmt(cur.km2),`km² Russian-held · ${(100*cur.km2/UKRAINE_KM2).toFixed(1)}% of Ukraine`]);
+  if (cur && cur.front_km) rows.push([fmt(cur.front_km),'km of contact line']);
+  const lk = S.lean_km2||{};
+  if (lk.confirmed && lk.maximal && lk.maximal>lk.confirmed) rows.push([fmt(lk.maximal-lk.confirmed),'km² the sources disagree over']);
   if (S.uncertain_km2) rows.push([fmt(S.uncertain_km2),'km² contested or unclear']);
   if (S.ua_held_ru_km2) rows.push([fmt(S.ua_held_ru_km2),'km² Ukrainian-held in Russia']);
   if (S.ru_ahead_km2) rows.push([fmt(S.ru_ahead_km2),'km² Russian map runs ahead']);
@@ -487,10 +509,60 @@ renderRibbon();
 const panel=$('#panel'), pbody=$('#pbody');
 function renderPanel(){
   document.querySelectorAll('#ptabs button[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
-  ({reports:renderReports, changes:renderChanges, layers:renderLayers, search:renderSearch, sources:renderSources}[tab])();
+  ({perspectives:renderPerspectives, reports:renderReports, changes:renderChanges, layers:renderLayers, search:renderSearch, sources:renderSources}[tab] || renderReports)();
   syncHash();
 }
 document.querySelectorAll('#ptabs button[data-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab;renderPanel();if(isPhone()&&sheet==='peek')setSheet('half');}));
+
+let perspFilter = '';
+function renderPerspectives(){
+  const P = D.perspectives || [];
+  const ids = Object.keys(srcLayers);
+  let h = `<h3>Source outlines</h3><p>Draw any source on top of our line to see where it disagrees.</p>`;
+  for (const id of ids){
+    const o = srcLayers[id];
+    h += `<div class="srcrow"><span class="chip" style="background:${o.colour};${o.kind==='claims'?'opacity:.6':''}"></span><span>${id.replace(/^rumap_/,'')}${o.kind==='claims'?' <span class="quiet">claims</span>':''}</span><span class="km">${fmt(o.km2)} km²</span><button class="sw2 ${srcOn.has(id)?'on':''}" data-src="${id}" role="switch"></button></div>`;
+  }
+  const lk = D.stats.lean_km2 || {};
+  if (lk.confirmed!=null){
+    h += `<h3>What each rule gives</h3><div class="leanbar">` +
+      ['confirmed','balanced','forward','maximal'].map(k=>`<div${k===lean?' style="color:var(--ink)"':''}><b>${fmt(lk[k]||0)}</b>${k}</div>`).join('') + `</div>`;
+  }
+  h += `<h3>Places the sources read differently${P.length?` (${P.length})`:''}</h3>`;
+  if (!P.length) h += `<p class="quiet">Nothing to compare yet. This fills in once two or more source maps are loaded.</p>`;
+  else {
+    h += `<input class="search" id="pq" placeholder="Filter by name" value="${perspFilter}" autocomplete="off">`;
+    const nrm = x => x.toLowerCase();
+    const list = perspFilter ? P.filter(x=>nrm(x.n).includes(nrm(perspFilter))||(x.uk&&nrm(x.uk).includes(nrm(perspFilter)))) : P;
+    for (const pl of list.slice(0,60)){
+      const chips = Object.entries(pl.says).map(([sid,v])=>`<span class="verdict ${v==='in'?'v-in':'v-out'}">${sid.replace(/^rumap_/,'').replace('isw_','ISW ')}: ${v==='in'?'held':'not held'}</span>`).join('');
+      const reps = pl.reports.length ? `<small>${pl.reports.length} report${pl.reports.length>1?'s':''} · latest ${dfmt(pl.reports[0].d)} ${pl.reports[0].src}</small>` : '';
+      h += `<button class="row" data-lat="${pl.lat}" data-lon="${pl.lon}" data-n="${pl.n}"><span class="body">${pl.n}${pl.uk?` <span class="quiet">${pl.uk}</span>`:''}<br>${chips}${reps}</span></button>`;
+    }
+    if (list.length > 60) h += `<p class="quiet">${list.length-60} more, filter to narrow.</p>`;
+  }
+  pbody.innerHTML = h;
+  pbody.querySelectorAll('.sw2[data-src]').forEach(b=>b.addEventListener('click',()=>{
+    const id=b.dataset.src; srcOn.has(id)?srcOn.delete(id):srcOn.add(id);
+    b.classList.toggle('on', srcOn.has(id)); applySourceLayers(); syncHash();
+  }));
+  const q = $('#pq');
+  if (q) q.addEventListener('input',()=>{ perspFilter=q.value; const at=q.selectionStart; renderPerspectives(); const q2=$('#pq'); if(q2){q2.focus(); q2.setSelectionRange(at,at);} });
+  pbody.querySelectorAll('.row[data-lat]').forEach(b=>b.addEventListener('click',()=>{
+    map.flyTo([+b.dataset.lat,+b.dataset.lon], Math.max(map.getZoom(),11), {duration:.8});
+    showPerspectivePopup(b.dataset.n, +b.dataset.lat, +b.dataset.lon);
+    if(isPhone()) setSheet('peek');
+  }));
+}
+function showPerspectivePopup(name, lat, lon){
+  const pl = (D.perspectives||[]).find(x=>x.n===name && Math.abs(x.lat-lat)<1e-4);
+  if(!pl) return;
+  const rows = Object.entries(pl.says).map(([sid,v])=>`${sid.replace(/^rumap_/,'').replace('isw_','ISW ')}: <b>${v==='in'?'Russian-held':'not held'}</b>`).join('<br>');
+  const reps = pl.reports.map(r=>`${dfmt(r.d)} · ${r.k.replace(/_/g,' ')} · <a href="${r.u}" target="_blank" rel="noopener">${r.src}</a>`).join('<br>');
+  L.popup({maxWidth:280}).setLatLng([lat,lon])
+   .setContent(`<b>${pl.n}</b>${pl.uk?` <span style="color:var(--ink-3)">${pl.uk}</span>`:''}<br>${rows}${reps?`<hr style="border:0;border-top:1px solid var(--rule);margin:6px 0">${reps}`:''}`)
+   .openOn(map);
+}
 
 function renderReports(){
   const shown = D.events.filter(e=>evFilter.has(e.k)&&sideFilter.has(e.s));
@@ -575,7 +647,7 @@ function applyLayers(){
   const on=(g,f)=>{ if(!g) return; f?g.addTo(map):map.removeLayer(g); };
   on(oblasts,layerState.oblasts); on(rivers,layerState.rivers&&paper); on(lakes,layerState.rivers&&paper);
   on(roads,layerState.roads&&paper&&map.getZoom()>=7); on(urban,layerState.urban&&paper&&map.getZoom()>=7);
-  drawLabels(); setMode(mode);
+  drawLabels(); baseLayersForLean();
 }
 function setTiles(t){
   tileMode=t; Object.values(tiles).forEach(x=>map.removeLayer(x));
@@ -666,7 +738,7 @@ $('#zin').addEventListener('click',()=>map.zoomIn()); $('#zout').addEventListene
 
 // URL state
 function syncHash(){
-  const p=new URLSearchParams({m:mode,t:tab,l:nameLang});
+  const p=new URLSearchParams({m:lean,t:tab,l:nameLang});
   if(anchorIdx>=0&&anchors.length) p.set('d',anchors[anchorIdx].d);
   const c=map.getCenter(); p.set('v',`${c.lat.toFixed(3)},${c.lng.toFixed(3)},${map.getZoom()}`);
   history.replaceState(null,'','#'+p.toString());
@@ -679,13 +751,13 @@ function readHash(){
   if(p.get('v')){const[a,b,z]=p.get('v').split(',').map(Number); if(!isNaN(a)) map.setView([a,b],z);}
   if(p.get('t')) tab=p.get('t');
   if(p.get('d')){const i=anchors.findIndex(x=>x.d===p.get('d')); if(i>=0) anchorIdx=i;}
-  if(p.get('m')) mode=p.get('m');
+  if(p.get('m') && OURS[p.get('m')]) lean=p.get('m');
 }
 
 // go
 readHash();
 if(isPhone()){setSheet('peek');$('#hdr').classList.add('folded');$('#fold').textContent='More';} else setPanelOpen(true);
-renderPanel(); setMode(mode); drawLabels();
+renderPanel(); setLean(lean); baseLayersForLean(); drawLabels();
 })();
 </script>
 </body>
