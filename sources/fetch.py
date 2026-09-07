@@ -135,7 +135,7 @@ def fetch_lostarmour():
 # ---------------------------------------------------------------- ISW
 
 def fetch_isw():
-    found = {}
+    found, all_titles = {}, set()
     for item in C.ISW_ITEMS:
         try:
             data = get(f"https://www.arcgis.com/sharing/rest/content/items/{item}/data?f=json").json()
@@ -144,6 +144,7 @@ def fetch_isw():
             continue
         for ly in data.get("operationalLayers", []) + data.get("baseMap", {}).get("baseMapLayers", []):
             title = (ly.get("title") or ly.get("id") or "").lower().replace("_", " ")
+            all_titles.add(ly.get("title") or ly.get("id") or "?")
             url = ly.get("url")
             if not url:
                 continue
@@ -151,8 +152,11 @@ def fetch_isw():
                 if kw in title and key not in found:
                     found[key] = (url, ly.get("title"))
     if not found:
-        log("ISW: no layers discovered (web map format may have changed)")
+        log("ISW: none of the wanted layers matched. Titles seen: " + ", ".join(sorted(all_titles)))
         return False
+    missing = sorted(set(C.ISW_WANT.values()) - set(found))
+    if missing:
+        log(f"ISW: no layer matched for {missing}. Titles seen: " + ", ".join(sorted(all_titles)))
     ok = False
     for key, (url, title) in found.items():
         try:
@@ -214,16 +218,31 @@ STOP = {"россии", "украины", "рф", "всу", "вс", "миноб�
 
 
 def _posts(channel, days):
-    """Yield (post_id, iso_date, text) from the public web preview, paging backwards."""
+    """Yield (post_id, iso_date, text) from the public web preview, paging backwards.
+
+    Telegram's markup shifts around, so split on the message wrapper and pull the three fields out of each
+    block independently rather than matching them in one sweep."""
     since = NOW - timedelta(days=days)
     url = f"https://t.me/s/{channel}"
     pages = 0
     while url and pages < 8:
         h = get(url).text
         pages += 1
-        chunks = re.findall(
-            r'data-post="([^"]+)"(.*?)(?:<div class="tgme_widget_message_text[^"]*"[^>]*>(.*?)</div>)?.*?datetime="([^"]+)"',
-            h, re.S)
+        blocks = re.split(r'<div class="tgme_widget_message[ _]', h)
+        if len(blocks) < 2:
+            log(f"  {channel}: page {pages} had no message blocks ({len(h)} bytes) — markup may have changed")
+        chunks = []
+        for b in blocks[1:]:
+            pm = re.search(r'data-post="([^"]+)"', b)
+            tm = re.search(r'datetime="([^"]+)"', b)
+            if not (pm and tm):
+                continue
+            texts = re.findall(r'<div class="tgme_widget_message_text[^"]*"[^>]*>(.*?)</div>\s*(?:<div class="tgme_widget_message_(?:footer|reply_markup)|</div>)', b, re.S)
+            if not texts:
+                texts = re.findall(r'<div class="tgme_widget_message_text[^"]*"[^>]*>(.*)', b, re.S)
+            chunks.append((pm.group(1), "", (texts[0] if texts else ""), tm.group(1)))
+        if not chunks:
+            log(f"  {channel}: page {pages} parsed 0 posts")
         oldest = None
         for post, _mid, body, ts in chunks:
             try:
@@ -263,7 +282,9 @@ def fetch_telegram():
         for ch in channels:
             try:
                 n = 0
+                seen_posts = [0]
                 for post, t, text in _posts(ch, C.TELEGRAM_DAYS):
+                    seen_posts[0] += 1
                     if (ch, post) in seen or not text.strip():
                         continue
                     hits = _extract(text, pats)
@@ -275,7 +296,7 @@ def fetch_telegram():
                                        "d": t.strftime("%Y-%m-%d"), "kind": kind, "name": name, "text": text[:400]})
                         n += 1
                 added += n
-                log(f"telegram ok: {ch} ({side}) {n} mentions")
+                log(f"telegram ok: {ch} ({side}) {seen_posts[0]} posts read, {n} mentions")
             except Exception as e:
                 log(f"telegram {ch} failed: {e}")
     cutoff = (NOW - timedelta(days=C.EVENT_KEEP_DAYS)).strftime("%Y-%m-%d")

@@ -35,10 +35,15 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .leaflet-popup-tip{background:var(--paper)}
 .leaflet-container a.leaflet-popup-close-button{color:var(--ink-3)}
 
-.lbl{white-space:nowrap;color:#3B434A;text-shadow:0 0 3px var(--land-ua),0 0 3px var(--land-ua),0 0 3px var(--land-ua);pointer-events:none;transform:translate(6px,-9px)}
-.lbl.big{font-weight:600;font-size:13px}.lbl.mid{font-weight:500;font-size:12px}.lbl.small{font-size:11px;color:#59626A}
-.lbl::before{content:"";position:absolute;left:-7px;top:6px;width:4px;height:4px;border-radius:50%;background:#3B434A}
-.lbl.big::before{width:6px;height:6px;left:-9px;border:1.5px solid var(--land-ua)}
+.lbl{white-space:nowrap;pointer-events:none;transform:translate(6px,-9px);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 4px rgba(0,0,0,.65);letter-spacing:.01em}
+.lbl.big{font-weight:600;font-size:13px}
+.lbl.mid{font-weight:500;font-size:12px}
+.lbl.small{font-size:10.5px;font-weight:400;color:#EDEDED}
+.lbl::before{content:"";position:absolute;left:-7px;top:6px;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 2px rgba(0,0,0,.9)}
+.lbl.big::before{width:5px;height:5px;left:-8px;top:5px}
+body.paper .lbl{color:#333A40;text-shadow:0 0 3px #F2F0E9,0 0 3px #F2F0E9,0 0 2px #F2F0E9}
+body.paper .lbl.small{color:#59626A}
+body.paper .lbl::before{background:#3B434A;box-shadow:none}
 .hot-lbl{font-size:11px;font-weight:600;color:var(--unsure);white-space:nowrap;transform:translate(-50%,12px);text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff}
 .searchpin{width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.35)}
 
@@ -227,6 +232,12 @@ const lines2ll = ls => ls.map(ring2ll);
 const map = L.map('map',{zoomControl:false,minZoom:5,maxZoom:14,zoomSnap:.5,preferCanvas:true});
 map.attributionControl.setPrefix('');
 const canvas = L.canvas({padding:.5});
+map.createPane('fills');   map.getPane('fills').style.zIndex   = 400;
+map.createPane('edges');   map.getPane('edges').style.zIndex   = 460;
+map.createPane('labels');  map.getPane('labels').style.zIndex  = 430;
+map.getPane('labels').style.pointerEvents = 'none';
+const fillCanvas = L.canvas({padding:.5, pane:'fills'});
+const edgeSvg = L.svg({padding:.5, pane:'edges'});   // SVG keeps the line crisp at every zoom
 const attrib = ['Base: Natural Earth, GeoNames'];
 if (D.control.ru.length) attrib.unshift('Control: ' + (S.base_source==='kalibrated' ? 'Kalibrated' : 'ISW'));
 map.attributionControl.addAttribution(attrib.join(' · '));
@@ -243,26 +254,21 @@ D.basemap.urban.forEach(u=>L.polygon(polys2ll(u),{renderer:canvas,fillColor:'#D8
 lakes.addTo(map); rivers.addTo(map); oblasts.addTo(map);
 const tiles = {
   osm:L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}),
-  sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Esri, Maxar'})
+  sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,maxNativeZoom:18,attribution:'Esri, Maxar, Earthstar Geographics'})
 };
-let tileMode='none';
+let tileMode='sat';
 
 // ---------- war layers
 const ruControl = L.polygon(polys2ll(D.control.ru),{renderer:canvas,fillColor:css('--ru'),fillOpacity:.24,color:css('--ru'),weight:.7,opacity:.5,interactive:false});
-const uaHeld = L.polygon(polys2ll(D.control.ua_held),{renderer:canvas,fillColor:css('--ua'),fillOpacity:.22,color:css('--ua'),weight:1,opacity:.65,interactive:false});
+const uaHeld = L.polygon(polys2ll(D.control.ua_held),{renderer:fillCanvas,pane:'fills',fillColor:css('--ua'),fillOpacity:.3,color:'#4FA3E8',weight:1.4,opacity:.95,interactive:false});
 const frontLine = L.polyline(lines2ll(D.control.front),{renderer:canvas,color:css('--ru'),weight:2.2,interactive:false});
 const claimedLayer = L.polygon(polys2ll(D.control.claimed),{renderer:canvas,fillColor:css('--claim'),fillOpacity:.2,color:css('--claim'),weight:1.1,dashArray:'5 4',interactive:false});
 const claimGap = L.polygon(polys2ll(D.uncertainty.claim_gap),{renderer:canvas,fillColor:css('--claim'),fillOpacity:.28,color:css('--claim'),weight:1,dashArray:'3 3',interactive:false});
 const disagree = L.polygon(polys2ll(D.uncertainty.disagreement),{renderer:canvas,fillColor:css('--unsure'),fillOpacity:.22,color:css('--unsure'),weight:.9,dashArray:'2 4',interactive:false});
 const greyZone = L.layerGroup();
-if (D.uncertainty.zone.length) L.polygon(polys2ll(D.uncertainty.zone),{renderer:canvas,fillColor:css('--unsure'),fillOpacity:.3,color:css('--unsure'),weight:1,dashArray:'2 3',interactive:false}).addTo(greyZone);
-const featherGroup = L.layerGroup();
-D.uncertainty.feather.forEach(f=>L.polygon(polys2ll(f.c),{renderer:canvas,fillColor:css('--ru'),fillOpacity:.05+.13*f.w,stroke:false,interactive:false}).addTo(featherGroup));
-const hotGroup = L.layerGroup();
-D.uncertainty.hotspots.forEach(h=>{
-  L.circle([h.lat,h.lon],{renderer:canvas,radius:h.km*1000,color:css('--unsure'),weight:1,dashArray:'3 4',fillColor:css('--unsure'),fillOpacity:.12})
-   .bindPopup(`<b>${h.place}</b><br>${h.n} report${h.n>1?'s':''} in the last 10 days${h.sides.length>1?', both sides':''}<br><span style="color:var(--ink-2)">${h.kinds.join(', ').replace(/_/g,' ')}</span>`).addTo(hotGroup);
-});
+if (D.uncertainty.zone.length) L.polygon(polys2ll(D.uncertainty.zone),{renderer:fillCanvas,pane:'fills',fillColor:'#E8E2D6',fillOpacity:.42,color:'#F2ECE0',weight:1.4,opacity:.9,interactive:false}).addTo(greyZone);
+const featherGroup = L.layerGroup();   // kept as an empty handle; this map has no soft edges
+const hotGroup = L.layerGroup();       // report clusters are listed, not drawn as blobs
 const advGroup = L.layerGroup();
 D.advances.forEach(a=>L.polyline(lines2ll([a.c]),{renderer:canvas,color:css('--ru'),weight:2,dashArray:'6 4',opacity:.8}).bindPopup(`<b>${a.n||'Axis'}</b><br>${a.src}`).addTo(advGroup));
 const markerGroup = L.layerGroup();
@@ -312,19 +318,23 @@ map.fitBounds(fitTarget, isPhone()?{paddingTopLeft:[10,150],paddingBottomRight:[
 const labelGroup = L.layerGroup().addTo(map);
 const layerState = {events:true, hotspots:true, feather:true, grey:true, advances:true, markers:true,
                     labels:true, oblasts:true, rivers:true, roads:true, urban:true, uaheld:true, forts:true};
-function labelClass(p,z){
-  if(z<=5.5) return p>=700000?'big':null;
-  if(z<=6.5) return p>=300000?'big':p>=90000?'mid':null;
-  if(z<=7.5) return p>=200000?'big':p>=40000?'mid':p>=20000?'small':null;
-  if(z<=8.5) return p>=100000?'big':p>=15000?'mid':p>=4000?'small':null;
-  return p>=100000?'big':p>=8000?'mid':'small';
+function labelClass(p,z,front){
+  const b = front ? 0.35 : 1;      // settlements on the line matter more than their size suggests
+  const s = v => v*b;
+  if(z<=5.5) return p>=s(500000)?'big':null;
+  if(z<=6.5) return p>=s(200000)?'big':p>=s(60000)?'mid':null;
+  if(z<=7.5) return p>=s(100000)?'big':p>=s(25000)?'mid':p>=s(9000)?'small':null;
+  if(z<=8.5) return p>=s(60000)?'big':p>=s(9000)?'mid':p>=s(2000)?'small':null;
+  if(z<=9.5) return p>=s(40000)?'big':p>=s(4000)?'mid':p>=s(600)?'small':null;
+  if(z<=11)  return p>=s(40000)?'big':p>=s(2000)?'mid':'small';
+  return p>=s(20000)?'big':p>=s(800)?'mid':'small';
 }
 function drawLabels(){
   labelGroup.clearLayers();
   if(!layerState.labels) return;
   const z=map.getZoom(), b=map.getBounds().pad(.05), placed=[];
   for(const p of D.places){
-    const cls=labelClass(p.p,z); if(!cls) continue;
+    const cls=labelClass(p.p,z,p.f); if(!cls) continue;
     const ll=L.latLng(p.lat,p.lon); if(!b.contains(ll)) continue;
     const txt = (nameLang==='cyr' && p.uk) ? p.uk : p.n;
     const pt=map.latLngToContainerPoint(ll), w=txt.length*(cls==='big'?7.4:cls==='mid'?6.6:6)+14, h=16;
@@ -333,8 +343,8 @@ function drawLabels(){
     for(const q of placed){ if(Math.abs(q.x-pt.x)<(q.w+w)/2 && Math.abs(q.y-pt.y)<h){clash=true;break;} }
     if(clash) continue;
     placed.push({x:pt.x+w/2,y:pt.y,w});
-    L.marker(ll,{icon:L.divIcon({className:'lbl '+cls,html:txt,iconSize:null}),interactive:false,keyboard:false}).addTo(labelGroup);
-    if(placed.length>150) break;
+    L.marker(ll,{icon:L.divIcon({className:'lbl '+cls,html:txt,iconSize:null}),pane:'labels',interactive:false,keyboard:false}).addTo(labelGroup);
+    if(placed.length>320) break;
   }
 }
 map.on('moveend zoomend', drawLabels);
@@ -352,8 +362,8 @@ const LEAN_TEXT = {
   forward:   'Anything any source map draws as Russian-held.',
   maximal:   'Every source map, plus unconfirmed claims and reported captures. Deliberately overstated.'
 };
-const ourFill = L.polygon([], {renderer:canvas, fillColor:css('--ru'), fillOpacity:.24, color:css('--ru'), weight:.7, opacity:.5, interactive:false});
-const ourFront = L.polyline([], {renderer:canvas, color:css('--ru'), weight:2.4, interactive:false});
+const ourFill = L.polygon([], {renderer:fillCanvas, pane:'fills', fillColor:css('--ru'), fillOpacity:.32, stroke:false, interactive:false});
+const ourFront = L.polyline([], {renderer:edgeSvg, pane:'edges', color:'#FF2D2D', weight:2.4, opacity:1, lineJoin:'round', interactive:false});
 const SRC_COLOURS = ['#9E2A2B','#2F6FB0','#B4574E','#4C7A5B','#7B5EA7','#C08A2E','#4B4F55'];
 const srcLayers = {};
 (D.source_layers||[]).forEach((sl,i)=>{
@@ -636,7 +646,7 @@ function renderLayers(){
   let h=`<h3>Layers</h3>`;
   for(const [k,label,sub,dis] of rows) h+=`<div class="tog"><div>${label}${sub?`<small>${sub}</small>`:''}</div><button class="sw2 ${layerState[k]&&!dis?'on':''}" data-k="${k}" ${dis?'disabled':''} role="switch"></button></div>`;
   h+=`<h3>Place names</h3><div class="seg" id="langseg"><button data-l="latin" class="${nameLang==='latin'?'on':''}">Latin</button><button data-l="cyr" class="${nameLang==='cyr'?'on':''}">Cyrillic</button></div>`;
-  h+=`<h3>Background</h3><div class="seg" id="tileseg"><button data-t="none" class="${tileMode==='none'?'on':''}">Paper</button><button data-t="osm" class="${tileMode==='osm'?'on':''}">OpenStreetMap</button><button data-t="sat" class="${tileMode==='sat'?'on':''}">Satellite</button></div><p class="quiet">Paper is drawn from this file and works with no connection.</p>`;
+  h+=`<h3>Background</h3><div class="seg" id="tileseg"><button data-t="sat" class="${tileMode==='sat'?'on':''}">Satellite</button><button data-t="osm" class="${tileMode==='osm'?'on':''}">Streets</button><button data-t="none" class="${tileMode==='none'?'on':''}">Paper</button></div><p class="quiet">Satellite and streets stream tiles. Paper is drawn from this file and works offline, but its rivers and coastline are from a fixed dataset and do not reflect changes on the ground.</p>`;
   pbody.innerHTML=h;
   pbody.querySelectorAll('.sw2').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;layerState[k]=!layerState[k];b.classList.toggle('on',layerState[k]);applyLayers();}));
   pbody.querySelectorAll('#tileseg button').forEach(b=>b.addEventListener('click',()=>setTiles(b.dataset.t)));
@@ -645,12 +655,14 @@ function renderLayers(){
 function applyLayers(){
   const paper=tileMode==='none';
   const on=(g,f)=>{ if(!g) return; f?g.addTo(map):map.removeLayer(g); };
-  on(oblasts,layerState.oblasts); on(rivers,layerState.rivers&&paper); on(lakes,layerState.rivers&&paper);
+  if(!paper){ [baseGroup,rivers,lakes,roads,urban,oblasts].forEach(g=>map.removeLayer(g)); }
+  on(oblasts,layerState.oblasts&&paper); on(rivers,layerState.rivers&&paper); on(lakes,layerState.rivers&&paper);
   on(roads,layerState.roads&&paper&&map.getZoom()>=7); on(urban,layerState.urban&&paper&&map.getZoom()>=7);
   drawLabels(); baseLayersForLean();
 }
 function setTiles(t){
   tileMode=t; Object.values(tiles).forEach(x=>map.removeLayer(x));
+  document.body.classList.toggle('paper', t==='none');
   if(t==='none') baseGroup.addTo(map); else { map.removeLayer(baseGroup); tiles[t].addTo(map); tiles[t].bringToBack(); }
   document.querySelectorAll('#tileseg button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   applyLayers();
@@ -757,7 +769,7 @@ function readHash(){
 // go
 readHash();
 if(isPhone()){setSheet('peek');$('#hdr').classList.add('folded');$('#fold').textContent='More';} else setPanelOpen(true);
-renderPanel(); setLean(lean); baseLayersForLean(); drawLabels();
+setTiles(tileMode); renderPanel(); setLean(lean); baseLayersForLean(); drawLabels();
 })();
 </script>
 </body>

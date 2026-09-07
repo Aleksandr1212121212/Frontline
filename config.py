@@ -30,9 +30,13 @@ ISW_WANT = {
     "claimedrussianterritory": "claimed",
     "claimed russian": "claimed",
     "russiacotinukraine": "control",
+    "russia cot": "control",
     "assessed russian controlled": "control",
+    "assessed control": "control",
+    "russian controlled ukrainian territory": "control",
     "assessedrussianadvance": "advances",
     "assessed russian advance": "advances",
+    "russian advances": "advances",
     "fortification": "fortifications",
     "partisan": "partisan",
 }
@@ -50,6 +54,12 @@ EVENT_KEEP_DAYS = 60        # how long parsed events stay in the file
 
 # ---------------------------------------------------------------- classification of KML layers
 # Matched against the lowercased layer name first, then the fill colour.
+# Layers that are never control, whatever colour they are: map keys, archives of past events, notes.
+IGNORE_LAYER_KEYWORDS = [
+    "условные обозначения", "обозначения", "legend", "key", "архив", "archive", "notes", "untitled",
+    "год", "20", "история", "history", "past", "old",
+]
+
 LAYER_KEYWORDS = [
     ("ru_control",  ["russian control", "russian-controlled", "russian occupied", "occupied", "russian advance zone", "under russian"]),
     ("ua_control",  ["ukrainian control", "ukrainian-controlled", "ukrainian held", "afu control", "liberated", "ukrainian advance"]),
@@ -69,6 +79,7 @@ COLOUR_CLASS = {"red": "ru_control", "crimson": "ru_control", "pink": "ru_claime
 BBOX = (20.5, 43.0, 42.5, 53.5)
 UKRAINE_KM2 = 603628
 MIN_POLY_KM2 = 0.05          # drop slivers below this
+MAX_SOURCE_KM2 = 300_000     # after clipping to Ukraine, more than this is implausible; drop it and say so
 UNCERTAINTY_MIN_KM = 2.0     # feathered edge, minimum half-width
 UNCERTAINTY_MAX_KM = 12.0    # feathered edge where sources disagree most
 EVENT_CLUSTER_KM = 12.0      # radius for turning report clusters into an uncertainty zone

@@ -61,11 +61,23 @@ STOP = {
     "увеличена", "расширена", "восстановлен", "заявлено", "около", "однако", "продвижение",
     "операторы", "подразделения", "формируемая", "произведены", "комбриг", "батальон", "хронология",
     "материалы", "автор", "статистические", "силы", "средства", "итоги", "сводка",
+    # groupings, formations and the vocabulary of the reports themselves
+    "север", "юг", "запад", "восток", "днепр", "центр", "активные", "флаги", "бойцами", "бойцы",
+    "воины", "подразделениями", "расчеты", "операторами", "группировка", "группировки",
+    "народной", "республики", "республике", "область", "области", "округа", "края",
+    "бурятии", "забайкальцы", "приморцы", "сахалинские", "амурские", "чеченские", "донецкой",
+    "луганской", "запорожской", "херсонской", "харьковской", "сумской", "днепропетровской",
+    "вкс", "мо рф", "минобороны", "старлинк", "starlink",
+    # report vocabulary that arrives capitalised at the start of a sentence
+    "верховный", "видео", "военнослужащие", "вооруженными", "вооружёнными", "идёт", "идет",
+    "инфильтрационные", "штурмовики", "штурмовые", "российской", "федерации", "силами",
+    "владимир", "путин", "президент", "министр", "генерал", "командир", "полковник",
 }
 VERBISH = re.compile(r"(?:ена|ены|ено|ила|или|ился|лись|вают|яют)$", re.I)
 # a lone oblast/axis adjective ("Сумской", "Краснолиманском") is a region, not the settlement
 REGIONISH = re.compile(r"(?:ской|ском|ская|ского|скому)$", re.I)
 PREP = {"около", "возле", "близ", "под", "над", "при", "из", "от", "до", "за", "на", "в", "во", "у", "к", "по"}
+DIRECTION = re.compile(r"^(?:северо|юго|северно|южно)?[- ]?(?:западнее|восточнее|севернее|южнее|северо-западнее|северо-восточнее|юго-западнее|юго-восточнее)\s+", re.I)
 # a two-word candidate is rejected when its head noun is one of these
 HEAD_STOP = {"позиции", "части", "застройке", "секторе", "районе", "зоне", "окраинах", "пунктах", "рубеже"}
 
@@ -87,21 +99,22 @@ def _body(page):
     return txt[start if start > 0 else 0: end if end > 0 else len(txt)]
 
 
-TOPONYM = re.compile(r"[А-ЯЁ][а-яё\-]{2,}(?:\s+[А-ЯЁ][а-яё\-]{2,})?")
+TOPONYM = re.compile(r"[А-ЯЁ][а-яё]{2,}(?:-[А-ЯЁ][а-яё]{2,})?(?:\s+[А-ЯЁ][а-яё]{2,}(?:-[А-ЯЁ][а-яё]{2,})?)?")
 
 
 def _toponyms(clause):
     """Every capitalised candidate in a clause, minus the vocabulary that merely looks like one."""
     out = []
+    clause = DIRECTION.sub("", clause)
     for m in TOPONYM.finditer(clause):
-        cand = m.group(0).strip()
+        cand = DIRECTION.sub("", m.group(0).strip()).strip()
         parts = cand.split()
         if parts and parts[0].lower() in PREP:
             parts = parts[1:]
-            cand = " ".join(parts)
+        parts = [p for p in parts if p.lower() not in STOP]          # drop report vocabulary, keep the name
+        parts = [p for i, p in enumerate(parts) if i == 0 or p.lower() != parts[i - 1].lower()]
+        cand = " ".join(parts)
         if not parts:
-            continue
-        if all(p.lower() in STOP for p in parts):
             continue
         if len(parts) > 1 and parts[-1].lower() in (HEAD_STOP | STOP):
             cand = parts[0]

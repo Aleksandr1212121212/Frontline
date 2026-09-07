@@ -69,6 +69,9 @@ _DECL = [
     ("ім", ["е"]), ("ем", ["е"]), ("ом", ["о", ""]),
     ("ах", ["и"]), ("ях", ["і"]),
     ("у", ["а", "о", ""]), ("ю", ["я", "е", ""]),
+    ("е", ["", "а", "о", "ь"]), ("и", ["ь", "а", "я", ""]),
+    ("ой", ["а", "ая"]), ("ей", ["я", "ья"]), ("ью", ["ь"]), ("ем", ["", "ь"]),
+    ("ом", ["ое", "о", ""]), ("ок", ["ки"]), ("ек", ["ки"]), ("ах", ["и"]),
     ("и", ["а", "е", "о", ""]), ("і", ["а", "я", "е", ""]),
     ("е", ["е", "а", "о"]), ("а", ["а", "о", ""]),
     ("я", ["я", "е"]), ("ой", ["ая", "ое"]), ("ей", ["ея"]),
@@ -165,12 +168,21 @@ class Gazetteer:
 
     def lookup(self, name):
         hits, seen = [], set()
-        for v in variants(name):
-            for r in self.index.get(v, []):
-                key = (r["lat"], r["lon"])
-                if key not in seen:
-                    seen.add(key)
-                    hits.append(r)
+
+        def collect(keys):
+            for v in keys:
+                for r in self.index.get(v, []):
+                    key = (r["lat"], r["lon"])
+                    if key not in seen:
+                        seen.add(key)
+                        hits.append(r)
+
+        collect(variants(name))
+        if not hits and " " in name:
+            # "Казачьей Лопани", "Святогорск Донецкой": try each word on its own
+            for tok in name.split():
+                if len(tok) > 4:
+                    collect(variants(tok))
         return hits
 
     def geocode(self, name, near=None, max_km=60):
@@ -185,12 +197,19 @@ class Gazetteer:
         scored = []
         for r in hits:
             d = near.distance(Point(r["lon"], r["lat"])) * 78.0   # deg -> km at ~48N, good enough to rank
-            scored.append((d, r))
+            score = d
+            if r["cc"] != "UA" and d > 30:
+                score += 60          # a Russian village far from the line is the wrong Ivanovka
+            if r["p"] >= 5000:
+                score -= 6           # a town is likelier to be in a sitrep than an unnamed hamlet
+            elif r["p"] == 0:
+                score += 4
+            scored.append((score, d, r))
         scored.sort(key=lambda x: x[0])
-        best_d, best = scored[0]
+        score, best_d, best = scored[0]
         if best_d > max_km:
             return None, "far"
-        if len(scored) > 1 and scored[1][0] - best_d < 8:
+        if len(scored) > 1 and scored[1][0] - score < 6:
             return best, "ambiguous"
         return best, "matched"
 

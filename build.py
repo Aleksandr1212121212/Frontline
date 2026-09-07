@@ -57,15 +57,26 @@ def _colour_family(hexcol):
 
 
 def classify_layer(name, features):
+    """Class for a group of features. Layer name wins; fill colour decides when the name says nothing."""
     n = (name or "").lower()
+    for w in C.IGNORE_LAYER_KEYWORDS:
+        if w in n:
+            return None, f"ignored: layer name contains {w!r}"
+    named = None
     for cls, words in C.LAYER_KEYWORDS:
         if any(w in n for w in words):
-            return cls, f"layer name {name!r}"
+            named = cls
+            break
     fills = [f.get("fill") for f in features if f.get("fill")]
-    if fills:
-        fam = _colour_family(max(set(fills), key=fills.count))
-        if fam in C.COLOUR_CLASS:
-            return C.COLOUR_CLASS[fam], f"fill colour {fam}"
+    fam = _colour_family(max(set(fills), key=fills.count)) if fills else None
+    coloured = C.COLOUR_CLASS.get(fam)
+    if named and coloured and named != coloured and fam in ("blue", "cyan"):
+        # a blue group inside a layer named for Russian control is the other side's territory
+        return coloured, f"fill colour {fam} overrides layer name {name!r}"
+    if named:
+        return named, f"layer name {name!r}"
+    if coloured:
+        return coloured, f"fill colour {fam}"
     kinds = {f["kind"] for f in features}
     if kinds == {"line"}:
         return "advance", "line-only layer"
@@ -74,10 +85,18 @@ def classify_layer(name, features):
     return None, "unclassified"
 
 
+def colour_groups(features):
+    """Split a layer into groups of one fill colour each, so a layer holding both sides is not read as one."""
+    groups = defaultdict(list)
+    for f in features:
+        groups[f.get("fill") or f.get("stroke") or "none"].append(f)
+    return groups
+
+
 def load_mymaps(want_russian=False):
     """My Maps sources in live/, classified. want_russian selects the Russian-side maps instead of the base ones."""
     out = {c: [] for c in CLASSES}
-    by_source = defaultdict(list)
+    by_source, ua_by_source = defaultdict(list), defaultdict(list)
     points, linefeats, report, sources = [], [], [], {}
     for path in sorted(glob.glob(os.path.join(LIVE, "*.json"))):
         base = os.path.basename(path)
@@ -93,9 +112,10 @@ def load_mymaps(want_russian=False):
             continue
         sources[src] = doc.get("fetched", "unknown")
         for layer in doc.get("layers", []):
-            cls, why = classify_layer(layer["name"], layer["features"])
+          for fill, feats in colour_groups(layer["features"]).items():
+            cls, why = classify_layer(layer["name"], feats)
             polys_, lines_, pts_ = [], [], []
-            for f in layer["features"]:
+            for f in feats:
                 if f["kind"] == "polygon":
                     polys_.append(f["coords"])
                 elif f["kind"] == "line":
@@ -103,20 +123,25 @@ def load_mymaps(want_russian=False):
                 else:
                     pts_.append({"lon": f["coords"][0], "lat": f["coords"][1], "n": f.get("name", ""),
                                  "d": f.get("desc", "")[:240], "src": src, "cls": cls})
-            report.append({"source": src, "layer": layer["name"], "class": cls, "why": why,
+            label = layer["name"] if len(colour_groups(layer["features"])) == 1 else f"{layer['name']} [{fill}]"
+            report.append({"source": src, "layer": label, "class": cls, "why": why,
                            "polygons": len(polys_), "lines": len(lines_), "points": len(pts_)})
             if cls and polys_:
                 g = G.from_rings(polys_)
                 out[cls].append(g)
                 if cls == "ru_control":
                     by_source[src].append(g)
-            linefeats.extend(lines_)
-            points.extend(pts_)
+                elif cls == "ua_control":
+                    ua_by_source[src].append(g)
+            if cls:                      # lines and pins from an ignored layer are map furniture, not data
+                linefeats.extend(lines_)
+                points.extend(pts_)
     geom = {}
     for c in CLASSES:
         geom[c] = G.polys(G.valid(unary_union(out[c])), C.MIN_POLY_KM2) if out[c] else MultiPolygon()
     per_src = {k: G.polys(G.valid(unary_union(v)), C.MIN_POLY_KM2) for k, v in by_source.items() if v}
-    return geom, points, linefeats, report, sources, per_src
+    per_src_ua = {k: G.polys(G.valid(unary_union(v)), C.MIN_POLY_KM2) for k, v in ua_by_source.items() if v}
+    return geom, points, linefeats, report, sources, per_src, per_src_ua
 
 
 def load_isw():
@@ -266,6 +291,17 @@ def build_history(today_geom):
 
 # ---------------------------------------------------------------- basemap
 
+def _near_ukraine(coords, ukraine_box=(21.5, 44.0, 41.5, 53.0), max_span_deg=14):
+    """Drop lines that are really country outlines: they sprawl far wider than any front axis."""
+    if not coords:
+        return False
+    xs = [p[0] for p in coords]; ys = [p[1] for p in coords]
+    if max(xs) - min(xs) > max_span_deg or max(ys) - min(ys) > max_span_deg:
+        return False
+    cx, cy = sum(xs) / len(xs), sum(ys) / len(ys)
+    return ukraine_box[0] <= cx <= ukraine_box[2] and ukraine_box[1] <= cy <= ukraine_box[3]
+
+
 def load_basemap():
     c = json.load(open(P("basemap", "basemap_clipped.json"), encoding="utf-8"))
     ukraine = unary_union([Polygon(r[0], r[1:]) for r in c["_ukraine"]])
@@ -284,12 +320,22 @@ def main(self_test=False):
     gaz = Gazetteer()
     log(f"gazetteer: {len(gaz.places)} places ({'full' if gaz.full else 'seed, pop>1000 only'})")
 
+    def clip_to_ukraine(g, label):
+        """Control geometry means occupied Ukraine. Russian federal subjects on a Russian map are not that."""
+        if g.is_empty:
+            return g, MultiPolygon()
+        inside = G.polys(G.valid(G.ll(G.ea(g).intersection(G.ea(ukraine)))), C.MIN_POLY_KM2)
+        outside = G.polys(G.valid(G.ll(G.ea(g).difference(G.ea(ukraine)))), 5.0)
+        if not outside.is_empty:
+            log(f"  {label}: {round(G.km2(outside)):,} km2 outside Ukraine dropped from control")
+        return inside, outside
+
     log("my maps sources…")
-    my, my_points, my_lines, class_report, my_sources, per_source = load_mymaps()
+    my, my_points, my_lines, class_report, my_sources, per_source, per_source_ua = load_mymaps()
     for r in class_report:
         log(f"  {r['source']}: {r['layer']!r} -> {r['class'] or 'IGNORED'} ({r['why']}; "
             f"{r['polygons']}p {r['lines']}l {r['points']}pt)")
-    ru_my, ru_points, ru_lines, ru_class_report, ru_sources, ru_per_source = load_mymaps(want_russian=True)
+    ru_my, ru_points, ru_lines, ru_class_report, ru_sources, ru_per_source, ru_per_source_ua = load_mymaps(want_russian=True)
     for r in ru_class_report:
         log(f"  [ru] {r['source']}: {r['layer']!r} -> {r['class'] or 'IGNORED'} ({r['why']}; "
             f"{r['polygons']}p {r['lines']}l {r['points']}pt)")
@@ -303,33 +349,67 @@ def main(self_test=False):
     if ru.is_empty and "control" in isw:
         ru = G.polys(isw["control"], C.MIN_POLY_KM2)
         base_source = "isw"
-    ua_held = my["ua_control"]
+    # "Ukrainian-held inside Russia" means inside Russia, not any sliver outside the Ukraine polygon
+    russia = unary_union([Polygon(r[0], r[1:]) for c in basemap["land"] if c["a3"] == "RUS" for r in c["c"]])
+    ua_held = G.polys(G.valid(G.ll(G.ea(unary_union([my["ua_control"], ru_my["ua_control"]])).buffer(0)
+                                    .intersection(G.ea(russia).buffer(0)))), 20.0)
     grey = my["grey"]
     claimed = my["ru_claimed"]
     if claimed.is_empty and "claimed" in isw:
         claimed = G.polys(isw["claimed"], C.MIN_POLY_KM2)
 
+    ru, ru_outside = clip_to_ukraine(ru, "base control")
     have_control = not ru.is_empty
     front = MultiLineString()
     if have_control:
         inner = G.ea(ukraine).buffer(-2500)
         front = G.lines(G.ll(G.ea(ru).boundary.intersection(inner)))
 
-    # ---- every source's own reading of Russian-held ground, kept separately
+    # ---- every source's own reading of Russian-held ground, clipped to Ukraine and sanity-checked
     readings = []
-    for src, doc_geom in per_source.items():
-        if not doc_geom.is_empty:
-            readings.append({"id": src, "kind": "map", "geom": doc_geom})
-    for src, doc_geom in ru_per_source.items():
-        if not doc_geom.is_empty:
-            readings.append({"id": src, "kind": "map", "geom": doc_geom})
+
+    def add_reading(src, geom, kind="map"):
+        if geom.is_empty:
+            return
+        # clip first: a Russian map draws Russia too, and that is not occupied Ukraine
+        geom, _ = clip_to_ukraine(geom, src)
+        if geom.is_empty:
+            log(f"  {src}: nothing left inside Ukraine, skipped")
+            return
+        area = G.km2(geom)
+        if area > C.MAX_SOURCE_KM2:
+            log(f"  {src}: {area:,.0f} km2 is implausible for occupied Ukraine, skipped")
+            return
+        readings.append({"id": src, "kind": kind, "geom": geom})
+
+    ua_area = G.ea(ukraine).area / 1e6
+
+    def reading_for(src, own, ua_own):
+        """Some maps draw the other side's territory instead of the occupied part. When a source's
+        Ukrainian-control layer covers most of the country, its Russian-held reading is the complement."""
+        if not ua_own.is_empty:
+            covered = G.ea(ua_own).buffer(0).intersection(G.ea(ukraine).buffer(0)).area / 1e6
+            if covered > 0.4 * ua_area:
+                comp = G.polys(G.valid(G.ll(G.ea(ukraine).buffer(0).difference(G.ea(ua_own).buffer(0)))), C.MIN_POLY_KM2)
+                log(f"  {src}: read as Ukraine minus its Ukrainian-control layer ({round(G.km2(comp)):,} km2)")
+                return comp
+        return own
+
+    for src in set(per_source) | set(per_source_ua):
+        add_reading(src, reading_for(src, per_source.get(src, MultiPolygon()), per_source_ua.get(src, MultiPolygon())))
+    for src in set(ru_per_source) | set(ru_per_source_ua):
+        add_reading(src, reading_for(src, ru_per_source.get(src, MultiPolygon()), ru_per_source_ua.get(src, MultiPolygon())))
     if "control" in isw:
-        readings.append({"id": "isw_control", "kind": "map", "geom": G.polys(isw["control"], C.MIN_POLY_KM2)})
+        add_reading("isw_control", G.polys(isw["control"], C.MIN_POLY_KM2))
     if "claimed" in isw:
-        readings.append({"id": "isw_claimed", "kind": "claims", "geom": G.polys(isw["claimed"], C.MIN_POLY_KM2)})
+        add_reading("isw_claimed", G.polys(isw["claimed"], C.MIN_POLY_KM2), kind="claims")
 
     # the Russian-side reading of the same ground
-    ru_read = ru_my["ru_control"]
+    ru_read = MultiPolygon()
+    for r in readings:
+        if r["id"].startswith("rumap_"):
+            ru_read = r["geom"]
+            break
     if ru_read.is_empty and not my["ru_claimed"].is_empty:
         ru_read = my["ru_claimed"]
     ru_ahead = MultiPolygon()
@@ -342,24 +422,23 @@ def main(self_test=False):
     ev_zone, hotspots = event_uncertainty(events)
 
     # ---- uncertainty: where the sources disagree, plus where reports cluster
+    # where the source maps do not agree: the union minus the part they all share. A cut polygon, not a blur.
     disagreement = MultiPolygon()
-    if have_control and "control" in isw and base_source != "isw":
-        a, b = G.ea(ru), G.ea(isw["control"])
-        disagreement = G.polys(G.valid(G.ll(a.symmetric_difference(b))), 1.0)
+    map_geoms = [r["geom"] for r in readings if r["kind"] == "map"]
+    if len(map_geoms) > 1:
+        u = G.ea(map_geoms[0]).buffer(0)
+        i = G.ea(map_geoms[0]).buffer(0)
+        for g in map_geoms[1:]:
+            ge = G.ea(g).buffer(0)
+            u = u.union(ge)
+            i = i.intersection(ge)
+        disagreement = G.polys(G.valid(G.ll(u.difference(i))), 1.0)
     claim_gap = MultiPolygon()
     if have_control and not claimed.is_empty:
         claim_gap = G.polys(G.valid(G.ll(G.ea(claimed).difference(G.ea(ru)))), 1.0)
 
-    uncertain = G.polys(G.valid(unary_union([g for g in (grey, ru_my["grey"], ev_zone, disagreement) if not g.is_empty])), 0.5)
-    # feathered edge along the contact line, widened where reports cluster
-    feather_rings = []
-    if have_control:
-        halfw = C.UNCERTAINTY_MIN_KM
-        core = G.polys(G.valid(G.buffer_km(front, halfw)), 0.2)
-        for ring, w in G.feather(front, C.UNCERTAINTY_MAX_KM, steps=3):
-            r = G.polys(G.valid(ring), 0.5)
-            if not r.is_empty:
-                feather_rings.append({"w": round(w, 2), "c": G.poly_coords(G.simplify_m(r, 400), 4)})
+    uncertain = G.polys(G.valid(unary_union([g for g in (grey, ru_my["grey"], disagreement) if not g.is_empty])), 0.5)
+    feather_rings = []   # no soft edges: every boundary on this map is a cut line
 
     # symmetry: how much each side actually contributed, shown on the page
     def side_counts(side):
@@ -473,6 +552,20 @@ def main(self_test=False):
         perspectives.sort(key=lambda x: (-len(x["reports"]), -x["p"]))
     log(f"  {len(perspectives)} places where sources disagree or something was reported")
 
+    # labels: everything within reach of the fighting, then only real towns further out
+    if have_control:
+        band = G.ea(front).buffer(70000)
+        page_places = []
+        for p in gaz.places:
+            pt = G.ea(Point(p["lon"], p["lat"]))
+            near = band.contains(pt)
+            if near or p["p"] >= 2000:
+                page_places.append({"n": p["n"], "uk": p["uk"], "p": p["p"],
+                                    "lat": p["lat"], "lon": p["lon"], "f": 1 if near else 0})
+    else:
+        page_places = [{**p, "f": 0} for p in gaz.page_places()]
+    log(f"  {len(page_places)} places carried for labels and search")
+
     log("history…")
     save_snapshot(ru, uncertain, base_source)
     series, anchors, changes, last_change = build_history(ru) if have_control else ([], [], [], None)
@@ -526,12 +619,15 @@ def main(self_test=False):
         "russian_read": {
             "control": G.poly_coords(ru_read, 5),
             "ahead": G.poly_coords(G.simplify_m(ru_ahead, 300), 4) if not ru_ahead.is_empty else [],
-            "advances": [{"n": l["n"], "c": l["c"], "src": l["src"]} for l in ru_lines][:400],
+            "advances": [a for a in ({"n": l["n"], "c": l["c"], "src": l["src"]} for l in ru_lines)
+                         if _near_ukraine(a["c"])][:400],
             "markers": ru_points[:400],
         },
         "isw": {k: (G.poly_coords(G.polys(v), 5) if v.geom_type in ("Polygon", "MultiPolygon") else G.line_coords(v, 5))
                 for k, v in isw.items()},
-        "advances": [{"n": l["n"], "c": l["c"], "src": l["src"]} for l in my_lines if l["cls"] in ("advance", None)][:400],
+        "advances": [a for a in (
+            {"n": l["n"], "c": l["c"], "src": l["src"]} for l in my_lines if l["cls"] in ("advance", None))
+            if _near_ukraine(a["c"])][:400],
         "markers": my_points[:600],
         "events": [{"d": e["d"], "k": e["kind"], "s": e["side"], "src": e["src"], "u": e["url"],
                     "n": e.get("place", e["name"]), "raw": e["name"], "lat": e["lat"], "lon": e["lon"],
@@ -541,7 +637,7 @@ def main(self_test=False):
         "series": series,
         "anchors": anchors,
         "changes": changes[:400],
-        "places": gaz.page_places(),
+        "places": page_places,
         "basemap": basemap,
         "sources": {
             **{f"mymaps:{k}": v for k, v in my_sources.items()},
