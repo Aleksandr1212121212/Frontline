@@ -3,6 +3,48 @@
   <Document>
     <name>Kalibrated Map 2.0</name>
     <description>Kalibrated Maps is developed by (https://x.com/squatsons) ). It was created with the aim of providing a publicly available but accurate control map of Ukraine. The map is updated based on confirmed information  but it is still under development and may have some mistakes. </description>
+    <Style id="icon-1899-FF5252-nodesc-normal">
+      <IconStyle>
+        <color>ff5252ff</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="icon-1899-FF5252-nodesc-highlight">
+      <IconStyle>
+        <color>ff5252ff</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+        <hotSpot x="32" xunits="pixels" y="64" yunits="insetPixels"/>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="icon-1899-FF5252-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1899-FF5252-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1899-FF5252-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
     <Style id="line-0288D1-2508-nodesc-normal">
       <LineStyle>
         <color>ffd18802</color>
@@ -761,6 +803,82 @@
       <Pair>
         <key>highlight</key>
         <styleUrl>#poly-3949AB-2369-92-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Style id="poly-7CB342-1200-77-nodesc-normal">
+      <LineStyle>
+        <color>ff42b37c</color>
+        <width>1.2</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>4d42b37c</color>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="poly-7CB342-1200-77-nodesc-highlight">
+      <LineStyle>
+        <color>ff42b37c</color>
+        <width>1.8</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>4d42b37c</color>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="poly-7CB342-1200-77-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#poly-7CB342-1200-77-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#poly-7CB342-1200-77-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Style id="poly-7CB342-2171-97-nodesc-normal">
+      <LineStyle>
+        <color>ff42b37c</color>
+        <width>2.171</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>6142b37c</color>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="poly-7CB342-2171-97-nodesc-highlight">
+      <LineStyle>
+        <color>ff42b37c</color>
+        <width>3.2565</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>6142b37c</color>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="poly-7CB342-2171-97-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#poly-7CB342-2171-97-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#poly-7CB342-2171-97-nodesc-highlight</styleUrl>
       </Pair>
     </StyleMap>
     <Style id="poly-7CB342-2369-92-nodesc-normal">
@@ -1563,9 +1681,152 @@
     </StyleMap>
     <Folder>
       <name>Ukrainian advances</name>
+      <Placemark>
+        <name>Lyman</name>
+        <styleUrl>#poly-0288D1-2568-102-nodesc</styleUrl>
+        <Polygon>
+          <outerBoundaryIs>
+            <LinearRing>
+              <tessellate>1</tessellate>
+              <coordinates>
+                37.8365525,49.0482495,0
+                37.8199014,49.0473494,0
+                37.7983151,49.0420329,0
+                37.7773432,49.0323975,0
+                37.7764506,49.0269404,0
+                37.7786477,49.0230591,0
+                37.7805647,49.0176635,0
+                37.7720406,49.0172322,0
+                37.771808,49.0080405,0
+                37.7819753,49.0035037,0
+                37.7789304,48.9983391,0
+                37.7782747,48.9924082,0
+                37.7829859,48.9898177,0
+                37.7870103,48.9901557,0
+                37.7707956,48.9797304,0
+                37.7921602,48.9653682,0
+                37.7861169,48.962674,0
+                37.7875587,48.9398257,0
+                37.7919,48.9239691,0
+                37.7908388,48.9190547,0
+                37.7896456,48.8920705,0
+                37.8041074,48.9062404,0
+                37.8315733,48.9033067,0
+                37.8608701,48.9033067,0
+                37.86499,48.9031563,0
+                37.8695676,48.9120321,0
+                37.8661344,48.9263205,0
+                37.8335188,48.9487224,0
+                37.8497694,48.9530062,0
+                37.8502271,48.965104,0
+                37.8643034,48.9708888,0
+                37.8720281,48.982757,0
+                37.8705404,48.9915436,0
+                37.866535,48.9974756,0
+                37.8668783,49.0069353,0
+                37.8698537,49.010013,0
+                37.8679083,49.0228475,0
+                37.8544042,49.023748,0
+                37.8568075,49.0382294,0
+                37.8360937,49.0393547,0
+                37.8365525,49.0482495,0
+              </coordinates>
+            </LinearRing>
+          </outerBoundaryIs>
+        </Polygon>
+      </Placemark>
     </Folder>
     <Folder>
       <name>Confirmed Russian advances</name>
+      <Placemark>
+        <name>Dobropillya</name>
+        <styleUrl>#poly-7CB342-2171-97-nodesc</styleUrl>
+        <Polygon>
+          <outerBoundaryIs>
+            <LinearRing>
+              <tessellate>1</tessellate>
+              <coordinates>
+                37.0297796,48.4201174,0
+                37.0347005,48.4240667,0
+                37.059992,48.4238388,0
+                37.0789892,48.4271803,0
+                37.0765778,48.4357476,0
+                37.0745751,48.4431689,0
+                37.090368,48.4447631,0
+                37.0925423,48.4459398,0
+                37.0944306,48.4486346,0
+                37.0796105,48.4493936,0
+                37.0722291,48.4504943,0
+                37.0649621,48.4545171,0
+                37.0572373,48.4544412,0
+                37.0531174,48.4521642,0
+                37.0514008,48.4494316,0
+                37.0376679,48.4479514,0
+                37.0391556,48.4350453,0
+                37.0296571,48.4332989,0
+                37.0307442,48.428629,0
+                37.0304009,48.4256673,0
+                37.0294282,48.4225156,0
+                37.0297796,48.4201174,0
+              </coordinates>
+            </LinearRing>
+          </outerBoundaryIs>
+        </Polygon>
+      </Placemark>
+      <Placemark>
+        <name>Khrypuny</name>
+        <styleUrl>#poly-7CB342-1200-77-nodesc</styleUrl>
+        <Polygon>
+          <outerBoundaryIs>
+            <LinearRing>
+              <tessellate>1</tessellate>
+              <coordinates>
+                37.2297996,50.3347229,0
+                37.2516484,50.3406813,0
+                37.2554249,50.3370293,0
+                37.2610325,50.338198,0
+                37.2682423,50.3404622,0
+                37.2696156,50.3387823,0
+                37.2787709,50.3423612,0
+                37.2926182,50.347656,0
+                37.3059506,50.3351301,0
+                37.3169369,50.3394032,0
+                37.318768,50.3399144,0
+                37.3276943,50.330053,0
+                37.3408551,50.3348379,0
+                37.3391384,50.337358,0
+                37.3330731,50.3509787,0
+                37.3314709,50.3545932,0
+                37.3232311,50.3659825,0
+                37.3116726,50.3701159,0
+                37.3083252,50.3680356,0
+                37.3064083,50.3672873,0
+                37.3046631,50.3677801,0
+                37.3035187,50.3687655,0
+                37.302174,50.3705721,0
+                37.3012585,50.371448,0
+                37.2992272,50.3718677,0
+                37.2972817,50.371959,0
+                37.2949356,50.3738202,0
+                37.2929043,50.3752982,0
+                37.2763866,50.3786557,0
+                37.2624821,50.3881422,0
+                37.262196,50.3890907,0
+                37.2599644,50.390477,0
+                37.2576183,50.3908783,0
+                37.2557873,50.3924835,0
+                37.2223133,50.3793125,0
+                37.2248787,50.3761594,0
+                37.2340339,50.3667435,0
+                37.2244209,50.3620714,0
+                37.2256797,50.3540401,0
+                37.2251076,50.3476506,0
+                37.2297996,50.3347229,0
+              </coordinates>
+            </LinearRing>
+          </outerBoundaryIs>
+        </Polygon>
+      </Placemark>
       <Placemark>
         <name>Chervona Krynytsya</name>
         <styleUrl>#poly-7CB342-2369-92-nodesc</styleUrl>
@@ -1582,15 +1843,18 @@
                 36.0199878,47.5845969,0
                 36.0219192,47.5884259,0
                 36.022475,47.5999257,0
-                36.0122969,47.6003936,0
-                36.0108092,47.5986187,0
-                35.9810546,47.5976155,0
-                35.9804824,47.5999306,0
-                35.9659484,47.598773,0
-                35.9672072,47.6084183,0
+                36.0227854,47.6060205,0
+                36.0473648,47.6045503,0
+                36.049768,47.6177432,0
+                36.0158446,47.6206461,0
+                35.9957029,47.6222965,0
+                35.9765914,47.6197782,0
+                35.9729579,47.6251391,0
+                35.9620128,47.6242616,0
+                35.9627209,47.6190209,0
                 35.951071,47.6094985,0
-                35.9499266,47.6015511,0
-                35.9406569,47.6017054,0
+                35.9321596,47.608727,0
+                35.9289839,47.5937182,0
                 35.9381392,47.5925991,0
                 35.9434035,47.5915186,0
                 35.9396269,47.5776243,0
@@ -2308,13 +2572,13 @@
                 37.7061366,48.7113285,0
                 37.6982876,48.7209002,0
                 37.70533,48.7248934,0
-                37.7078213,48.7301737,0
-                37.716427,48.7347816,0
-                37.7440742,48.7380159,0
-                37.7428382,48.7421515,0
-                37.7372498,48.7444725,0
-                37.7295197,48.7463721,0
-                37.7356936,48.7529687,0
+                37.7039589,48.7278525,0
+                37.6943685,48.735008,0
+                37.7069953,48.7445251,0
+                37.7113383,48.7519425,0
+                37.7145905,48.7543762,0
+                37.7241982,48.7527105,0
+                37.7303721,48.7552322,0
                 37.7348742,48.7566494,0
                 37.7422947,48.7640074,0
                 37.7467351,48.7640374,0
@@ -8834,60 +9098,6 @@
           </outerBoundaryIs>
         </Polygon>
       </Placemark>
-      <Placemark>
-        <name>Polygon 20</name>
-        <styleUrl>#poly-0288D1-2568-102-nodesc</styleUrl>
-        <Polygon>
-          <outerBoundaryIs>
-            <LinearRing>
-              <tessellate>1</tessellate>
-              <coordinates>
-                37.8365525,49.0482495,0
-                37.8199014,49.0473494,0
-                37.7983151,49.0420329,0
-                37.7773432,49.0323975,0
-                37.7764506,49.0269404,0
-                37.7786477,49.0230591,0
-                37.7805647,49.0176635,0
-                37.7720406,49.0172322,0
-                37.771808,49.0080405,0
-                37.7819753,49.0035037,0
-                37.7789304,48.9983391,0
-                37.7782747,48.9924082,0
-                37.7829859,48.9898177,0
-                37.7870103,48.9901557,0
-                37.7707956,48.9797304,0
-                37.7921602,48.9653682,0
-                37.7861169,48.962674,0
-                37.7875587,48.9398257,0
-                37.7919,48.9239691,0
-                37.7908388,48.9190547,0
-                37.7896456,48.8920705,0
-                37.8041074,48.9062404,0
-                37.8315733,48.9033067,0
-                37.8608701,48.9033067,0
-                37.86499,48.9031563,0
-                37.8695676,48.9120321,0
-                37.8661344,48.9263205,0
-                37.8335188,48.9487224,0
-                37.8497694,48.9530062,0
-                37.8502271,48.965104,0
-                37.8643034,48.9708888,0
-                37.8720281,48.982757,0
-                37.8705404,48.9915436,0
-                37.866535,48.9974756,0
-                37.8668783,49.0069353,0
-                37.8698537,49.010013,0
-                37.8679083,49.0228475,0
-                37.8544042,49.023748,0
-                37.8568075,49.0382294,0
-                37.8360937,49.0393547,0
-                37.8365525,49.0482495,0
-              </coordinates>
-            </LinearRing>
-          </outerBoundaryIs>
-        </Polygon>
-      </Placemark>
     </Folder>
     <Folder>
       <name>Defense lines and forts</name>
@@ -11780,6 +11990,24 @@
     </Folder>
     <Folder>
       <name>Untitled layer</name>
+      <Placemark>
+        <name>South bridge</name>
+        <styleUrl>#icon-1899-FF5252-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            30.5938363,50.3945807,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Northern Bridge</name>
+        <styleUrl>#icon-1899-FF5252-nodesc</styleUrl>
+        <Point>
+          <coordinates>
+            30.5390712,50.4916217,0
+          </coordinates>
+        </Point>
+      </Placemark>
     </Folder>
   </Document>
 </kml>
