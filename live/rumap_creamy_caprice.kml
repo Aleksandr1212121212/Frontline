@@ -641,38 +641,6 @@
         <styleUrl>#poly-FF5252-498-23-highlight</styleUrl>
       </Pair>
     </StyleMap>
-    <Style id="poly-FFFFFF-1000-77-normal">
-      <LineStyle>
-        <color>ffffffff</color>
-        <width>1</width>
-      </LineStyle>
-      <PolyStyle>
-        <color>4dffffff</color>
-        <fill>1</fill>
-        <outline>1</outline>
-      </PolyStyle>
-    </Style>
-    <Style id="poly-FFFFFF-1000-77-highlight">
-      <LineStyle>
-        <color>ffffffff</color>
-        <width>1.5</width>
-      </LineStyle>
-      <PolyStyle>
-        <color>4dffffff</color>
-        <fill>1</fill>
-        <outline>1</outline>
-      </PolyStyle>
-    </Style>
-    <StyleMap id="poly-FFFFFF-1000-77">
-      <Pair>
-        <key>normal</key>
-        <styleUrl>#poly-FFFFFF-1000-77-normal</styleUrl>
-      </Pair>
-      <Pair>
-        <key>highlight</key>
-        <styleUrl>#poly-FFFFFF-1000-77-highlight</styleUrl>
-      </Pair>
-    </StyleMap>
     <Folder>
       <name>Положение сторон</name>
       <Placemark>
@@ -459017,6 +458985,42 @@ https://t.me/creamy_caprice/9424 https://t.me/creamy_caprice/9841 https://t.me/c
         </Point>
       </Placemark>
       <Placemark>
+        <name>03.10.26 Дополнительно
+
+Позиции ВС РФ под обстрелом ВСУ
+
+ `47.56559,35.80372`         
+ `47.56506,35.79150`         
+
+Источник 21+ https://t.me/creamy_caprice/12887?comment=78003
+#ru #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/12887<br>позиция: ВС РФ<br>дата: 2026.10.03]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/12887</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.10.03</value>
+          </Data>
+        </ExtendedData>
+        <MultiGeometry>
+          <Point>
+            <coordinates>
+              35.80372,47.56559,0
+            </coordinates>
+          </Point>
+          <Point>
+            <coordinates>
+              35.7915,47.56506,0
+            </coordinates>
+          </Point>
+        </MultiGeometry>
+      </Placemark>
+      <Placemark>
         <name>03.10.26 Золочев - Казачья Лопань
 
 Позиционные боевые действия в Харьковской зоне безопасности.
@@ -462971,6 +462975,36 @@ https://t.me/creamy_caprice/12798
         </Point>
       </Placemark>
       <Placemark>
+        <name>27.10.26 Гуляйполе - Новосёловка
+
+Позиционные боевые действия в районе Гуляйполя.
+Позиция ВСУ под артобстрелом ВС РФ в окрестностях Новосёловки. ВСУ удерживают позиции восточнее населённого пункта под своим контролем.
+
+ `47.62173,36.03030`         
+
+Источник https://vk.ru/wall-121828295_119101
+Геопривязка https://x.com/Eternal_January
+#ua</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13469<br>позиция: ВСУ*<br>дата: 2026.10.27]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13469</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВСУ*</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.10.27</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            36.0303,47.62173,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
         <name>28.10.26 Дополнительно
 
 Военнослужащий ВС РФ попал под обстрел ВСУ
@@ -463186,14 +463220,14 @@ https://t.me/creamy_caprice/12798
 
 Источник 21+ https://www.facebook.com/reel/3129387673934043
 #ru</name>
-        <description><![CDATA[описание: https://t.me/creamy_caprice/13401<br>позиция: ВС РФ*<br>дата: 2026.10.28]]></description>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13401<br>позиция: ВС РФ<br>дата: 2026.10.28]]></description>
         <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
         <ExtendedData>
           <Data name="описание">
             <value>https://t.me/creamy_caprice/13401</value>
           </Data>
           <Data name="позиция">
-            <value>ВС РФ*</value>
+            <value>ВС РФ</value>
           </Data>
           <Data name="дата">
             <value>2026.10.28</value>
@@ -463806,14 +463840,14 @@ https://t.me/creamy_caprice/12798
 Источник 21+ https://www.facebook.com/61554813916637
 Геопривязка https://t.me/domikpetra
 #ru</name>
-        <description><![CDATA[описание: https://t.me/creamy_caprice/13400<br>позиция: ВС РФ*<br>дата: 2026.11.02]]></description>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13400<br>позиция: ВС РФ<br>дата: 2026.11.02]]></description>
         <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
         <ExtendedData>
           <Data name="описание">
             <value>https://t.me/creamy_caprice/13400</value>
           </Data>
           <Data name="позиция">
-            <value>ВС РФ*</value>
+            <value>ВС РФ</value>
           </Data>
           <Data name="дата">
             <value>2026.11.02</value>
@@ -464197,14 +464231,14 @@ https://t.me/creamy_caprice/12798
 Источник https://t.me/Brigada_VARYAG/414
 Геопривязка https://x.com/moklasen
 #ua</name>
-        <description><![CDATA[описание: https://t.me/creamy_caprice/13398<br>позиция: ВСУ*<br>дата: 2026.11.06]]></description>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13398<br>позиция: ВСУ<br>дата: 2026.11.06]]></description>
         <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
         <ExtendedData>
           <Data name="описание">
             <value>https://t.me/creamy_caprice/13398</value>
           </Data>
           <Data name="позиция">
-            <value>ВСУ*</value>
+            <value>ВСУ</value>
           </Data>
           <Data name="дата">
             <value>2026.11.06</value>
@@ -464258,14 +464292,14 @@ https://t.me/creamy_caprice/12798
 Геопривязка https://x.com/Bielitzling
 Геопривязка https://x.com/hizzo_jay
 #ru</name>
-        <description><![CDATA[описание: https://t.me/creamy_caprice/13411<br>позиция: ВС РФ*<br>дата: 2026.11.07]]></description>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13411<br>позиция: ВС РФ<br>дата: 2026.11.07]]></description>
         <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
         <ExtendedData>
           <Data name="описание">
             <value>https://t.me/creamy_caprice/13411</value>
           </Data>
           <Data name="позиция">
-            <value>ВС РФ*</value>
+            <value>ВС РФ</value>
           </Data>
           <Data name="дата">
             <value>2026.11.07</value>
@@ -464383,14 +464417,14 @@ https://t.me/creamy_caprice/12798
 Источник 21+ https://www.facebook.com/420astur (видео удалено)
 Геопривязка https://t.me/domikpetra
 #ru</name>
-        <description><![CDATA[описание: https://t.me/creamy_caprice/13406<br>позиция: ВС РФ*<br>дата: 2026.11.08]]></description>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13406<br>позиция: ВС РФ<br>дата: 2026.11.08]]></description>
         <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
         <ExtendedData>
           <Data name="описание">
             <value>https://t.me/creamy_caprice/13406</value>
           </Data>
           <Data name="позиция">
-            <value>ВС РФ*</value>
+            <value>ВС РФ</value>
           </Data>
           <Data name="дата">
             <value>2026.11.08</value>
@@ -464413,14 +464447,14 @@ https://t.me/creamy_caprice/12798
 Источник https://t.me/ZS42MSD/9780
 Геопривязка https://x.com/richardzai38580
 #ua</name>
-        <description><![CDATA[описание: https://t.me/creamy_caprice/13407<br>позиция: ВСУ*<br>дата: 2026.11.08]]></description>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13407<br>позиция: ВСУ<br>дата: 2026.11.08]]></description>
         <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
         <ExtendedData>
           <Data name="описание">
             <value>https://t.me/creamy_caprice/13407</value>
           </Data>
           <Data name="позиция">
-            <value>ВСУ*</value>
+            <value>ВСУ</value>
           </Data>
           <Data name="дата">
             <value>2026.11.08</value>
@@ -464442,14 +464476,14 @@ https://t.me/creamy_caprice/12798
 
 Источник 21+ https://www.instagram.com/reel/DfdNge5R6RB
 #ru</name>
-        <description><![CDATA[описание: https://t.me/creamy_caprice/13413<br>позиция: ВС РФ*<br>дата: 2026.11.08]]></description>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13413<br>позиция: ВС РФ<br>дата: 2026.11.08]]></description>
         <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
         <ExtendedData>
           <Data name="описание">
             <value>https://t.me/creamy_caprice/13413</value>
           </Data>
           <Data name="позиция">
-            <value>ВС РФ*</value>
+            <value>ВС РФ</value>
           </Data>
           <Data name="дата">
             <value>2026.11.08</value>
@@ -464699,6 +464733,65 @@ https://t.me/creamy_caprice/12798
         </Point>
       </Placemark>
       <Placemark>
+        <name>11.11.26 Межевая - Демурино
+
+Активные боевые действия в Днепропетровской зоне безопасности.
+ВС РФ ударом барражирующего боеприпаса поразили бронетранспортёр ВСУ во время буксировки около Демурино. Детонация боекомплекта. Удаление от зоны контроля ВС РФ 18 км.
+
+ `48.14761,36.47221`         
+
+Источник https://t.me/lost_armour/12188
+#ua #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13433<br>позиция: ВСУ<br>дата: 2026.11.11]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13433</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВСУ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.11</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            36.47221,48.14761,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>11.11.26 Орехов
+
+Позиционные боевые действия в Орехове.
+ВСУ FPV-дроном обстреляли местного жителя в частном секторе Орехова.
+
+ `47.56013,35.79422`         
+
+Источник 21+ https://www.instagram.com/p/DfklcPbh4hX/
+Геопривязка https://t.me/Zabolocini
+#ru #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13461<br>позиция: ВС РФ<br>дата: 2026.11.11]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13461</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.11</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            35.79422,47.56013,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
         <name>12.11.26 Кременчуг - Новая Знаменка
 
 Уничтожение инфраструктурных объектов Украины.
@@ -464725,6 +464818,505 @@ https://t.me/creamy_caprice/12798
         <Point>
           <coordinates>
             33.46598,49.17109,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>12.11.26 Волчанск - Покаляное
+
+Позиционные боевые действия в Харьковской зоне безопасности.
+ВС РФ удерживают позиции в Покаляном под огнём противника. Боевые действия за контроль позиций вдоль южного берега реки Волчья.
+
+ 0:39 `50.29518,37.07382`    
+
+Источник 21+ https://t.me/Kramatorsk11Dpsu/659
+Геопривязка https://t.me/domikpetra
+#ru #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13435<br>позиция: ВС РФ<br>дата: 2026.11.12]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13435</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.12</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            37.07382,50.29518,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>13.11.26 Дополнительно
+
+Механизированная атака ВС РФ.
+
+ `48.35481,37.49428`         
+
+Источник 21+ https://t.me/creamy_caprice/9061?comment=77991
+#ru #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/9061<br>позиция: ВС РФ<br>дата: 2026.11.13]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/9061</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.13</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            37.49428,48.35481,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>13.11.26 Купянск - Садовое
+
+Активные боевые действия в районе Купянска.
+Пехотная группа ВС РФ форсирует реку Оскол около населённого пункта Садовое. ВС РФ продвинулись на 1 км и взяли под контроль переправу через реку в районе Купянска-Узлового.
+
+ `49.66397,37.62509`         
+ `49.66321,37.62372`         
+
+Источник https://t.me/kcaebirds/4027
+Геопривязка https://t.me/p0dimorka
+#ru</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13436<br>позиция: ВС РФ*<br>дата: 2026.11.13]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13436</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ*</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.13</value>
+          </Data>
+        </ExtendedData>
+        <MultiGeometry>
+          <Point>
+            <coordinates>
+              37.62509,49.66397,0
+            </coordinates>
+          </Point>
+          <Point>
+            <coordinates>
+              37.62372,49.66321,0
+            </coordinates>
+          </Point>
+        </MultiGeometry>
+      </Placemark>
+      <Placemark>
+        <name>13.11.26 Доброполье - Рубежное
+
+Позиционные боевые действия в районе Красноармейска.
+Штурмовые подразделения ВС РФ закрепились в Рубежном и удерживают позиции под обстрелами противника. Подтверждение зоны контроля ВС РФ.
+
+ `48.51105,37.19104`         
+
+Источник 21+ https://www.facebook.com/reel/1117516120874232
+Геопривязка https://t.me/Zabolocini
+#ru #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13439<br>позиция: ВС РФ<br>дата: 2026.11.13]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13439</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.13</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            37.19104,48.51105,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>13.11.26 Великий Бурлук - Купино
+
+Позиционные боевые действия в Харьковской зоне безопасности.
+Применение со стороны ВС РФ реактивной системы залпового огня для нанесения огневого поражения ВСУ на южных подступах к Купино. Уточнение зоны контроля ВСУ в Харьковской области.
+Сектор обстрела:
+
+ `50.23824,37.46095`         
+
+Источник https://t.me/mod_russia/68970
+Геопривязка https://x.com/alexskichambe
+#ua #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13440<br>позиция: ВСУ<br>дата: 2026.11.13]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13440</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВСУ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.13</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            37.46095,50.23824,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>13.11.26 Степногорск - Лукьяновское
+
+Позиционные боевые действия в районе Каменского.
+ВС РФ контролируют позиции в опорном пункте южнее Лукьяновского. Позиция ВС РФ обстреляна ВСУ. Уточнение зоны контроля ВС РФ.
+
+ 0:27 `47.59710,35.44422`    
+
+Источник 21+ https://t.me/mayzheshturmovyk/180
+Геопривязка https://t.me/Zabolocini
+#ru #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13442<br>позиция: ВС РФ<br>дата: 2026.11.13]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13442</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.13</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            35.44422,47.5971,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>13.11.26 Красноармейск - Шиловка
+
+Последствия боевых действий в районе Красноармейска.
+ВС РФ закрепляются в населённом пункте Шиловка и занимают новые позиции в жилой застройке и окрестностях. Подняты флаги РФ. Продвижение более 600 метров.
+
+ `48.38068,36.93750`         
+ `48.38334,36.93938`         
+
+Источник https://t.me/btr80/42781
+#ru</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13443<br>позиция: ВС РФ*<br>дата: 2026.11.13]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13443</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ*</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.13</value>
+          </Data>
+        </ExtendedData>
+        <MultiGeometry>
+          <Point>
+            <coordinates>
+              36.9375,48.38068,0
+            </coordinates>
+          </Point>
+          <Point>
+            <coordinates>
+              36.93938,48.38334,0
+            </coordinates>
+          </Point>
+        </MultiGeometry>
+      </Placemark>
+      <Placemark>
+        <name>13.11.26 Гуляйполе - Копани
+
+Позиционные боевые действия в районе Гуляйполя.
+ВСУ заняли позиции в жилой застройке населенного пункта Копани, продвинувшись до 700 метров. Позиции ВСУ были обстреляны ВС РФ.
+
+ `47.68630,36.03300`         
+
+Источник https://t.me/voin_dv/22040
+Геопривязка https://x.com/richardzai38580
+#ua</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13445<br>позиция: ВСУ*<br>дата: 2026.11.13]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13445</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВСУ*</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.13</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            36.033,47.6863,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>13.11.26 Межевая - Новопавловка
+
+Активные боевые действия в Днепропетровской зоне безопасности.
+Атака ВСУ пехотной группой в Новопавловке. Зачистка позиций ВС РФ в южной части населённого пункта. ВСУ увеличили зону контроля в жилой застройке более чем на 700 метров.
+
+ `48.12083,36.76685`         
+ `48.11819,36.77302`         
+
+Источник 21+ https://www.youtube.com/watch?v=3w14FwMUbv0
+#ua</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13447<br>позиция: ВСУ*<br>дата: 2026.11.13]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13447</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВСУ*</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.13</value>
+          </Data>
+        </ExtendedData>
+        <MultiGeometry>
+          <Point>
+            <coordinates>
+              36.76685,48.12083,0
+            </coordinates>
+          </Point>
+          <Point>
+            <coordinates>
+              36.77302,48.11819,0
+            </coordinates>
+          </Point>
+        </MultiGeometry>
+      </Placemark>
+      <Placemark>
+        <name>13.11.26 Доброполье - Доброполье
+
+Позиционные боевые действия в районе Красноармейска.
+Удар со стороны ВС РФ по позиции ВСУ в селе Доброполье. Боевые действия за контроль позиций в населённом пункте.
+
+ `48.41926,37.05874`         
+
+Источник https://t.me/opbps82/3/250
+Геопривязка https://x.com/moklasen
+#ua #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13458<br>позиция: ВСУ<br>дата: 2026.11.13]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13458</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВСУ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.13</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            37.05874,48.41926,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>14.11.26 Краснополье - Покровка
+
+Позиционные боевые действия в Сумской зоне безопасности.
+Позиция ВС РФ южнее Покровки обстреляна ВСУ. ВС РФ усиливают контроль рубежа Покровка - Новодмитровка и занимают новые позиции.
+
+ `50.77610,35.40047`         
+
+Источник 21+ https://t.me/tro119ua/200
+Геопривязка https://t.me/domikpetra
+#ru</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13451<br>позиция: ВС РФ*<br>дата: 2026.11.14]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13451</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ*</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.14</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            35.40047,50.7761,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>14.11.26 Покровское - Гавриловка
+
+Активные боевые действия в Днепропетровской зоне безопасности.
+ВС РФ ударами барражирующих боеприпасов сожгли бронемашину ВСУ на исходной позиции в Гавриловке. Удаление от зоны контроля ВС РФ около 10 км.
+
+ `48.08483,36.51224`         
+
+Источник https://t.me/lost_armour/12231
+#ua #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13452<br>позиция: ВСУ<br>дата: 2026.11.14]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13452</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВСУ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.14</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            36.51224,48.08483,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>15.11.26 Волчанск - Хрипуны
+
+Позиционные боевые действия в Харьковской зоне безопасности.
+Группа военнослужащих ВС РФ попала под обстрел ВСУ в окрестностях Хрипунов. ВС РФ продолжают контролировать район боевых действий южнее населённого пункта.
+
+ `50.31792,37.29791`         
+
+Источник 21+ https://t.me/kharkivnapriamok/5252
+Геопривязка https://t.me/Zabolocini
+#ru #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13457<br>позиция: ВС РФ<br>дата: 2026.11.15]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13457</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.15</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            37.29791,50.31792,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>15.11.26 Гуляйполе - Доброполье
+
+Позиционные боевые действия в районе Гуляйполя.
+ВС РФ удерживают позиции вдоль западного берега реки Гайчур на подступах к Доброполью. Позиция ВС РФ подверглась обстрелу ВСУ.
+
+ `47.77795,36.17238`         
+
+Источник 21+ https://www.facebook.com/reel/1880481539982615
+#ru #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13460<br>позиция: ВС РФ<br>дата: 2026.11.15]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13460</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВС РФ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.15</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            36.17238,47.77795,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>15.11.26 Славянск - Кривая Лука
+
+Позиционные боевые действия в районе Славянска.
+Позиция ВСУ под огнём ВС РФ. ВСУ увеличили зону контроля южнее Кривой Луки, продвинувшись на 2 км.
+
+ `48.85774,37.87857`         
+
+Источник https://t.me/specnazahmat/2503
+Геопривязка https://x.com/ZoamSc2
+#ua</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13465<br>позиция: ВСУ*<br>дата: 2026.11.15]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13465</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВСУ*</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.15</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            37.87857,48.85774,0
+          </coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>15.11.26 Орехов - Новоандреевка
+
+Активные боевые действия в районе Орехова.
+Группа военнослужащих ВСУ пытается занять позиции в южной части Новоандреевки под огнём ВС РФ. Боевые действия за контроль позиций в населённом пункте.
+
+ `47.53152,35.71010`         
+
+Источник https://t.me/zapravdu_1429/4014
+Геопривязка https://x.com/richardzai38580
+#ua #add</name>
+        <description><![CDATA[описание: https://t.me/creamy_caprice/13467<br>позиция: ВСУ<br>дата: 2026.11.15]]></description>
+        <styleUrl>#icon-1899-DB4436-labelson</styleUrl>
+        <ExtendedData>
+          <Data name="описание">
+            <value>https://t.me/creamy_caprice/13467</value>
+          </Data>
+          <Data name="позиция">
+            <value>ВСУ</value>
+          </Data>
+          <Data name="дата">
+            <value>2026.11.15</value>
+          </Data>
+        </ExtendedData>
+        <Point>
+          <coordinates>
+            35.7101,47.53152,0
           </coordinates>
         </Point>
       </Placemark>
@@ -573128,305 +573720,6 @@ https://t.me/The_Wrong_Side/27245
     </Folder>
     <Folder>
       <name>Условные обозначения</name>
-      <Placemark>
-        <name>продвижения ВС РФ за 9 - 12 ноября</name>
-        <description>ВС РФ</description>
-        <styleUrl>#poly-FFFFFF-1000-77</styleUrl>
-        <MultiGeometry>
-          <Polygon>
-            <outerBoundaryIs>
-              <LinearRing>
-                <tessellate>1</tessellate>
-                <coordinates>
-                  35.977995,47.529334,0
-                  35.97991,47.528754,0
-                  35.98142,47.528096,0
-                  35.982641,47.527392,0
-                  35.983687,47.526674,0
-                  35.984671,47.525975,0
-                  35.985708,47.525328,0
-                  35.986912,47.524764,0
-                  35.988398,47.524318,0
-                  35.99028,47.52402,0
-                  35.992264,47.52384,0
-                  35.99392,47.523746,0
-                  35.995337,47.523752,0
-                  35.996603,47.523875,0
-                  35.997806,47.524129,0
-                  35.999036,47.524528,0
-                  36.00038,47.525088,0
-                  36.001928,47.525824,0
-                  36.003767,47.526751,0
-                  36.008462,47.529169,0
-                  36.01225,47.531189,0
-                  36.015375,47.532954,0
-                  36.018077,47.534606,0
-                  36.0206,47.536288,0
-                  36.023186,47.538142,0
-                  36.026076,47.540313,0
-                  36.029512,47.542942,0
-                  36.033738,47.546173,0
-                  36.028582,47.543739,0
-                  36.024319,47.541909,0
-                  36.020679,47.54054,0
-                  36.017387,47.539488,0
-                  36.014172,47.538608,0
-                  36.010761,47.537757,0
-                  36.006883,47.536789,0
-                  36.002263,47.535562,0
-                  35.99663,47.53393,0
-                  35.993882,47.533033,0
-                  35.991659,47.532199,0
-                  35.989807,47.531443,0
-                  35.988176,47.530779,0
-                  35.986612,47.530221,0
-                  35.984964,47.529783,0
-                  35.98308,47.52948,0
-                  35.980808,47.529326,0
-                  35.977995,47.529334,0
-                </coordinates>
-              </LinearRing>
-            </outerBoundaryIs>
-          </Polygon>
-          <Polygon>
-            <outerBoundaryIs>
-              <LinearRing>
-                <tessellate>1</tessellate>
-                <coordinates>
-                  36.980253,48.368338,0
-                  36.977598,48.369416,0
-                  36.97521,48.37119,0
-                  36.975099,48.372013,0
-                  36.976593,48.372093,0
-                  36.97946,48.371614,0
-                  36.983468,48.370759,0
-                  36.988387,48.369715,0
-                  36.993984,48.368663,0
-                  37.000028,48.367789,0
-                  37.006287,48.367277,0
-                  37.01253,48.36731,0
-                  37.001206,48.368201,0
-                  36.989985,48.36984,0
-                  36.979228,48.371955,0
-                  36.9693,48.374277,0
-                  36.960562,48.376532,0
-                  36.953377,48.37845,0
-                  36.948108,48.37976,0
-                  36.945118,48.380191,0
-                  36.94477,48.37947,0
-                  36.947652,48.377679,0
-                  36.953183,48.37578,0
-                  36.960904,48.37364,0
-                  36.970356,48.371126,0
-                  36.980253,48.368338,0
-                </coordinates>
-              </LinearRing>
-            </outerBoundaryIs>
-          </Polygon>
-          <Polygon>
-            <outerBoundaryIs>
-              <LinearRing>
-                <tessellate>1</tessellate>
-                <coordinates>
-                  37.07224,48.48395,0
-                  37.075471,48.485629,0
-                  37.078754,48.487205,0
-                  37.08218,48.488653,0
-                  37.085838,48.489948,0
-                  37.089817,48.491063,0
-                  37.094208,48.491973,0
-                  37.099101,48.492654,0
-                  37.104585,48.493078,0
-                  37.11075,48.49322,0
-                  37.104883,48.493883,0
-                  37.09989,48.494706,0
-                  37.095569,48.495589,0
-                  37.09172,48.496431,0
-                  37.088142,48.497134,0
-                  37.084635,48.497596,0
-                  37.080998,48.497718,0
-                  37.07703,48.497399,0
-                  37.07253,48.49654,0
-                  37.071169,48.495943,0
-                  37.070231,48.494968,0
-                  37.069678,48.493691,0
-                  37.069471,48.492187,0
-                  37.069569,48.490534,0
-                  37.069934,48.488807,0
-                  37.070528,48.487083,0
-                  37.071309,48.485439,0
-                  37.07224,48.48395,0
-                </coordinates>
-              </LinearRing>
-            </outerBoundaryIs>
-          </Polygon>
-          <Polygon>
-            <outerBoundaryIs>
-              <LinearRing>
-                <tessellate>1</tessellate>
-                <coordinates>
-                  37.44739,48.57627,0
-                  37.443813,48.577426,0
-                  37.440708,48.578428,0
-                  37.437947,48.579235,0
-                  37.435402,48.579804,0
-                  37.432945,48.580093,0
-                  37.43045,48.580062,0
-                  37.427787,48.579667,0
-                  37.42483,48.578867,0
-                  37.42145,48.57762,0
-                  37.418271,48.57584,0
-                  37.415965,48.573619,0
-                  37.414283,48.571109,0
-                  37.412978,48.568457,0
-                  37.4118,48.565813,0
-                  37.410502,48.563326,0
-                  37.408835,48.561145,0
-                  37.40655,48.55942,0
-                  37.405602,48.559083,0
-                  37.406179,48.559095,0
-                  37.411904,48.559577,0
-                  37.418455,48.560332,0
-                  37.42612,48.56126,0
-                  37.429726,48.562095,0
-                  37.43256,48.563529,0
-                  37.434819,48.565394,0
-                  37.436701,48.567524,0
-                  37.438405,48.56975,0
-                  37.440128,48.571906,0
-                  37.442068,48.573822,0
-                  37.444422,48.575333,0
-                  37.44739,48.57627,0
-                </coordinates>
-              </LinearRing>
-            </outerBoundaryIs>
-          </Polygon>
-          <Polygon>
-            <outerBoundaryIs>
-              <LinearRing>
-                <tessellate>1</tessellate>
-                <coordinates>
-                  37.600573,49.722897,0
-                  37.599256,49.723146,0
-                  37.59799,49.723159,0
-                  37.596789,49.723005,0
-                  37.595665,49.722758,0
-                  37.594631,49.722488,0
-                  37.5937,49.722266,0
-                  37.592886,49.722165,0
-                  37.592202,49.722256,0
-                  37.59166,49.72261,0
-                  37.591488,49.723022,0
-                  37.591647,49.72347,0
-                  37.592061,49.723963,0
-                  37.592652,49.724508,0
-                  37.593345,49.725116,0
-                  37.594063,49.725794,0
-                  37.594728,49.726551,0
-                  37.595265,49.727397,0
-                  37.595596,49.728339,0
-                  37.595591,49.728987,0
-                  37.595357,49.729613,0
-                  37.594971,49.730208,0
-                  37.594508,49.73076,0
-                  37.594044,49.731258,0
-                  37.593653,49.731692,0
-                  37.593412,49.732051,0
-                  37.593396,49.732324,0
-                  37.59368,49.7325,0
-                  37.592901,49.732144,0
-                  37.592399,49.731609,0
-                  37.592092,49.730942,0
-                  37.591902,49.730192,0
-                  37.591749,49.729407,0
-                  37.591551,49.728636,0
-                  37.591228,49.727926,0
-                  37.590701,49.727325,0
-                  37.58989,49.726882,0
-                  37.587535,49.726288,0
-                  37.585238,49.726103,0
-                  37.583033,49.726198,0
-                  37.580951,49.726442,0
-                  37.579027,49.726705,0
-                  37.577292,49.726859,0
-                  37.575781,49.726773,0
-                  37.574526,49.726316,0
-                  37.57356,49.72536,0
-                  37.573101,49.724131,0
-                  37.573112,49.7227,0
-                  37.573526,49.721134,0
-                  37.574276,49.719502,0
-                  37.575295,49.717873,0
-                  37.576517,49.716316,0
-                  37.577875,49.714899,0
-                  37.579301,49.713691,0
-                  37.58073,49.71276,0
-                  37.581437,49.712549,0
-                  37.582025,49.712719,0
-                  37.582539,49.713195,0
-                  37.583026,49.7139,0
-                  37.583534,49.714757,0
-                  37.584109,49.71569,0
-                  37.584797,49.716623,0
-                  37.585645,49.717478,0
-                  37.5867,49.71818,0
-                  37.588646,49.719201,0
-                  37.59028,49.720087,0
-                  37.59169,49.720843,0
-                  37.59297,49.721474,0
-                  37.594208,49.721983,0
-                  37.595497,49.722375,0
-                  37.596927,49.722655,0
-                  37.598589,49.722828,0
-                  37.600573,49.722897,0
-                </coordinates>
-              </LinearRing>
-            </outerBoundaryIs>
-          </Polygon>
-        </MultiGeometry>
-      </Placemark>
-      <Placemark>
-        <name>продвижения ВСУ за 9 - 12 ноября</name>
-        <description>ВСУ</description>
-        <styleUrl>#poly-FFFFFF-1000-77</styleUrl>
-        <Polygon>
-          <outerBoundaryIs>
-            <LinearRing>
-              <tessellate>1</tessellate>
-              <coordinates>
-                35.8381,47.56085,0
-                35.839674,47.560102,0
-                35.840642,47.558922,0
-                35.84117,47.557391,0
-                35.841423,47.55559,0
-                35.841567,47.553601,0
-                35.841767,47.551504,0
-                35.842189,47.54938,0
-                35.842998,47.547312,0
-                35.84436,47.54538,0
-                35.84542,47.544388,0
-                35.846418,47.543753,0
-                35.847393,47.543396,0
-                35.848383,47.543236,0
-                35.849425,47.543197,0
-                35.850558,47.543197,0
-                35.85182,47.543159,0
-                35.853248,47.543003,0
-                35.85488,47.54265,0
-                35.852014,47.544923,0
-                35.849895,47.547305,0
-                35.848311,47.549722,0
-                35.847048,47.5521,0
-                35.845894,47.554367,0
-                35.844635,47.556449,0
-                35.843058,47.558273,0
-                35.840951,47.559764,0
-                35.8381,47.56085,0
-              </coordinates>
-            </LinearRing>
-          </outerBoundaryIs>
-        </Polygon>
-      </Placemark>
       <Placemark>
         <name>до 24.02.2022 г.</name>
         <description>24.02.2022</description>
@@ -839572,60 +839865,6 @@ https://t.me/The_Wrong_Side/27245
             </outerBoundaryIs>
           </Polygon>
         </MultiGeometry>
-      </Placemark>
-      <Placemark>
-        <name/>
-        <styleUrl>#icon-1899-DB4436-labelson-nodesc</styleUrl>
-        <Point>
-          <coordinates>
-            35.8484214,47.5476262,0
-          </coordinates>
-        </Point>
-      </Placemark>
-      <Placemark>
-        <name/>
-        <styleUrl>#icon-1899-DB4436-labelson-nodesc</styleUrl>
-        <Point>
-          <coordinates>
-            37.4265998,48.5667211,0
-          </coordinates>
-        </Point>
-      </Placemark>
-      <Placemark>
-        <name/>
-        <styleUrl>#icon-1899-DB4436-labelson-nodesc</styleUrl>
-        <Point>
-          <coordinates>
-            36.9665121,48.3734727,0
-          </coordinates>
-        </Point>
-      </Placemark>
-      <Placemark>
-        <name/>
-        <styleUrl>#icon-1899-DB4436-labelson-nodesc</styleUrl>
-        <Point>
-          <coordinates>
-            37.081695,48.492572,0
-          </coordinates>
-        </Point>
-      </Placemark>
-      <Placemark>
-        <name/>
-        <styleUrl>#icon-1899-DB4436-labelson-nodesc</styleUrl>
-        <Point>
-          <coordinates>
-            36.0033844,47.5305985,0
-          </coordinates>
-        </Point>
-      </Placemark>
-      <Placemark>
-        <name/>
-        <styleUrl>#icon-1899-DB4436-labelson-nodesc</styleUrl>
-        <Point>
-          <coordinates>
-            37.58408,49.722225,0
-          </coordinates>
-        </Point>
       </Placemark>
     </Folder>
     <Folder>
